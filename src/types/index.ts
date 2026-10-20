@@ -105,6 +105,7 @@ export interface AdminActivity {
 
 export interface MarketplaceAdminData {
   owner: string;
+  fixedListingFee: string;
   platformFeeBps: number;
   maxFeeBps: number;
   pendingPlatformFees: number;

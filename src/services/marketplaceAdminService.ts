@@ -8,53 +8,73 @@ import { getMarketplace } from "@/web3/marketplace";
 const readProvider = new JsonRpcProvider(VITE_SEPOLIA_RPC_URL, 11155111);
 const readMarketplace = getMarketplace(readProvider);
 export async function getMarketplaceAdminData(): Promise<MarketplaceAdminData> {
-  const [owner, platformFeeBps, maxFeeBps, pendingPlatformFees, toBlock] =
-    await Promise.all([
-      readMarketplace.owner() as Promise<string>,
-      readMarketplace.platformFeeBps() as Promise<bigint>,
-      readMarketplace.MAX_FEE_BPS() as Promise<bigint>,
-      readMarketplace.pendingPlatformFees() as Promise<bigint>,
-      readProvider.getBlockNumber(),
-    ]);
+  const [
+    owner,
+    fixedListingFee,
+    platformFeeBps,
+    maxFeeBps,
+    pendingPlatformFees,
+    toBlock,
+  ] = await Promise.all([
+    readMarketplace.owner() as Promise<string>,
+    readMarketplace.listingFee() as Promise<bigint>,
+    readMarketplace.platformFeeBps() as Promise<bigint>,
+    readMarketplace.MAX_FEE_BPS() as Promise<bigint>,
+    readMarketplace.pendingPlatformFees() as Promise<bigint>,
+    readProvider.getBlockNumber(),
+  ]);
   const fromBlock = Math.max(0, toBlock - ACTIVITY_LOOKBACK_BLOCKS + 1);
-  const [created, listed, updated, sold, transferred, withdrawals, feeChanges] =
-    await Promise.all([
-      readMarketplace.queryFilter(
-        readMarketplace.filters.ProductCreated(),
-        fromBlock,
-        toBlock,
-      ),
-      readMarketplace.queryFilter(
-        readMarketplace.filters.ProductListed(),
-        fromBlock,
-        toBlock,
-      ),
-      readMarketplace.queryFilter(
-        readMarketplace.filters.ProductDetailsUpdated(),
-        fromBlock,
-        toBlock,
-      ),
-      readMarketplace.queryFilter(
-        readMarketplace.filters.ProductSold(),
-        fromBlock,
-        toBlock,
-      ),
-      readMarketplace.queryFilter(
-        readMarketplace.filters.OwnershipTransferred(),
-        fromBlock,
-        toBlock,
-      ),
-      readMarketplace.queryFilter(
-        readMarketplace.filters.Withdrawal(),
-        fromBlock,
-        toBlock,
-      ),
-      readMarketplace.queryFilter(
-        readMarketplace.filters.PlatformFeeUpdated(),
-        fromBlock,
-        toBlock,
-      ),
-    ]);
+  const [
+    created,
+    listed,
+    updated,
+    sold,
+    transferred,
+    withdrawals,
+    feeChanges,
+    listingFeeChanges,
+  ] = await Promise.all([
+    readMarketplace.queryFilter(
+      readMarketplace.filters.ProductCreated(),
+      fromBlock,
+      toBlock,
+    ),
+    readMarketplace.queryFilter(
+      readMarketplace.filters.ProductListed(),
+      fromBlock,
+      toBlock,
+    ),
+    readMarketplace.queryFilter(
+      readMarketplace.filters.ProductDetailsUpdated(),
+      fromBlock,
+      toBlock,
+    ),
+    readMarketplace.queryFilter(
+      readMarketplace.filters.ProductSold(),
+      fromBlock,
+      toBlock,
+    ),
+    readMarketplace.queryFilter(
+      readMarketplace.filters.OwnershipTransferred(),
+      fromBlock,
+      toBlock,
+    ),
+    readMarketplace.queryFilter(
+      readMarketplace.filters.Withdrawal(),
+      fromBlock,
+      toBlock,
+    ),
+    readMarketplace.queryFilter(
+      readMarketplace.filters.PlatformFeeUpdated(),
+      fromBlock,
+      toBlock,
+    ),
+    readMarketplace.queryFilter(
+      readMarketplace.filters.ListingFeeUpdated(),
+      fromBlock,
+      toBlock,
+    ),
+  ]);
 
   const logs = [
     ...created.map((log) => ({ log, event: "Product created" })),
@@ -64,6 +84,10 @@ export async function getMarketplaceAdminData(): Promise<MarketplaceAdminData> {
     ...transferred.map((log) => ({ log, event: "Ownership transferred" })),
     ...withdrawals.map((log) => ({ log, event: "Withdrawal" })),
     ...feeChanges.map((log) => ({ log, event: "Platform fee updated" })),
+    ...listingFeeChanges.map((log) => ({
+      log,
+      event: "Listing fee updated",
+    })),
   ];
   const activity = logs
     .map(({ log, event }): AdminActivity | null => {
@@ -94,6 +118,8 @@ export async function getMarketplaceAdminData(): Promise<MarketplaceAdminData> {
         amount = Number(formatUnits(args.amount, 18));
       } else if (parsed.name === "PlatformFeeUpdated") {
         description = `Platform fee changed from ${Number(args.oldFeeBps) / 100}% to ${Number(args.newFeeBps) / 100}%`;
+      } else if (parsed.name === "ListingFeeUpdated") {
+        description = `Fixed listing fee changed from ${formatUnits(args.oldFee, 18)} PHX to ${formatUnits(args.newFee, 18)} PHX`;
       }
 
       return {
@@ -111,11 +137,37 @@ export async function getMarketplaceAdminData(): Promise<MarketplaceAdminData> {
 
   return {
     owner: getAddress(owner),
+    fixedListingFee: formatUnits(fixedListingFee, 18),
     platformFeeBps: Number(platformFeeBps),
     maxFeeBps: Number(maxFeeBps),
     pendingPlatformFees: Number(formatUnits(pendingPlatformFees, 18)),
     activity,
   };
+}
+
+export async function getMarketplaceOwner(): Promise<string> {
+  const owner = (await readMarketplace.owner()) as string;
+
+  return getAddress(owner);
+}
+
+export async function updateFixedListingFee(
+  fee: bigint,
+  signer: JsonRpcSigner,
+): Promise<string> {
+  await assertOwnerAndNetwork(signer);
+  if (fee < 0n) {
+    throw new Error("Fixed listing fee cannot be negative.");
+  }
+
+  const marketplace = getMarketplace(signer);
+  const transaction = await marketplace.setListingFee(fee);
+  const receipt = await transaction.wait();
+  if (!receipt || receipt.status !== 1) {
+    throw new Error("Fixed listing fee update transaction failed.");
+  }
+
+  return receipt.hash;
 }
 
 export async function updateMarketplaceFee(
@@ -134,8 +186,8 @@ export async function updateMarketplaceFee(
   if (!receipt || receipt.status !== 1) {
     throw new Error("Platform fee update transaction failed.");
   }
-  
-return receipt.hash;
+
+  return receipt.hash;
 }
 
 export async function withdrawMarketplaceFees(
@@ -153,8 +205,8 @@ export async function withdrawMarketplaceFees(
   if (!receipt || receipt.status !== 1) {
     throw new Error("Platform fee withdrawal transaction failed.");
   }
-  
-return receipt.hash;
+
+  return receipt.hash;
 }
 
 async function assertOwnerAndNetwork(signer: JsonRpcSigner) {

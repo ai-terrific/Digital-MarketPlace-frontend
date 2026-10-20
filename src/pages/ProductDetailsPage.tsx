@@ -28,6 +28,9 @@ const ProductDetailsPage: React.FC = () => {
   const { connected, address, connect, getSigner } = useWallet();
   const [product, setProduct] = useState<Product | null>(null);
   const [platformFeeBps, setPlatformFeeBps] = useState(0);
+  const [listedPrice, setListedPrice] = useState("0");
+  const [platformFee, setPlatformFee] = useState("0");
+  const [total, setTotal] = useState("0");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [reloadVersion, setReloadVersion] = useState(0);
@@ -53,11 +56,22 @@ const ProductDetailsPage: React.FC = () => {
     }
 
     getProductDetails(id)
-      .then(({ product: chainProduct, platformFeeBps: feeBps }) => {
-        if (!active) return;
-        setProduct(chainProduct);
-        setPlatformFeeBps(feeBps);
-      })
+      .then(
+        ({
+          product: chainProduct,
+          listedPrice: chainPrice,
+          platformFee: chainFee,
+          total: purchaseTotal,
+          platformFeeBps: feeBps,
+        }) => {
+          if (!active) return;
+          setProduct(chainProduct);
+          setListedPrice(chainPrice);
+          setPlatformFee(chainFee);
+          setTotal(purchaseTotal);
+          setPlatformFeeBps(feeBps);
+        },
+      )
       .catch((error: unknown) => {
         if (!active) return;
         setLoadError(
@@ -117,9 +131,6 @@ const ProductDetailsPage: React.FC = () => {
       </Box>
     );
   }
-
-  const platformFee = (product.price * platformFeeBps) / 10000;
-  const total = product.price + platformFee;
 
   const handlePurchase = async () => {
     if (!connected) {
@@ -225,7 +236,7 @@ const ProductDetailsPage: React.FC = () => {
                     fontFamily: "'Space Grotesk', sans-serif",
                   }}
                 >
-                  {product.price} {product.currency}
+                  {listedPrice} {product.currency}
                 </Typography>
               </Box>
               <Box
@@ -237,13 +248,16 @@ const ProductDetailsPage: React.FC = () => {
                 }}
               >
                 <Typography variant="body2" color="text.secondary">
-                  Platform Fee ({(platformFeeBps / 100).toFixed(2)}%)
+                  Buyer Platform Fee ({(platformFeeBps / 100).toFixed(2)}%)
                 </Typography>
                 <Typography variant="body2">
-                  {platformFee.toFixed(product.currency === "ETH" ? 4 : 0)}{" "}
-                  {product.currency}
+                  {platformFee} {product.currency}
                 </Typography>
               </Box>
+              <Typography variant="caption" color="text.secondary">
+                The seller receives the full listed price of {listedPrice}{" "}
+                {product.currency}.
+              </Typography>
               <Divider sx={{ my: 1 }} />
               <Box
                 sx={{
@@ -259,8 +273,7 @@ const ProductDetailsPage: React.FC = () => {
                   variant="body1"
                   sx={{ fontWeight: 700, color: "primary.main" }}
                 >
-                  {total.toFixed(product.currency === "ETH" ? 4 : 0)}{" "}
-                  {product.currency}
+                  {total} {product.currency}
                 </Typography>
               </Box>
             </Card>
@@ -280,7 +293,7 @@ const ProductDetailsPage: React.FC = () => {
             <Box sx={{ display: "flex", gap: 1, mb: 3 }}>
               <Chip
                 label={`Status: ${product.status}`}
-                color={product.status === "active" ? "success" : "default"}
+                color={product.status === "Active" ? "success" : "default"}
                 size="small"
               />
               <Chip
@@ -303,12 +316,12 @@ const ProductDetailsPage: React.FC = () => {
               onClick={() => setBuyDialog(true)}
               startIcon={<ShoppingCart size={18} />}
               disabled={
-                product.status !== "active" ||
+                product.status !== "Active" ||
                 product.owner?.toLowerCase() === address?.toLowerCase()
               }
               sx={{ mb: 2 }}
             >
-              {product.status === "active" ? "Purchase" : "Not Available"}
+              {product.status === "Active" ? "Purchase" : "Not Available"}
             </Button>
           </motion.div>
         </Box>
@@ -345,18 +358,17 @@ const ProductDetailsPage: React.FC = () => {
                 Price
               </Typography>
               <Typography variant="body2">
-                {product.price} {product.currency}
+                {listedPrice} {product.currency}
               </Typography>
             </Box>
             <Box
               sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
             >
               <Typography variant="body2" color="text.secondary">
-                Platform Fee ({(platformFeeBps / 100).toFixed(2)}%)
+                Buyer Platform Fee ({(platformFeeBps / 100).toFixed(2)}%)
               </Typography>
               <Typography variant="body2">
-                {platformFee.toFixed(product.currency === "ETH" ? 4 : 0)}{" "}
-                {product.currency}
+                {platformFee} {product.currency}
               </Typography>
             </Box>
             <Divider sx={{ my: 1 }} />
@@ -368,8 +380,7 @@ const ProductDetailsPage: React.FC = () => {
                 variant="body2"
                 sx={{ fontWeight: 700, color: "primary.main" }}
               >
-                {total.toFixed(product.currency === "ETH" ? 4 : 0)}{" "}
-                {product.currency}
+                {total} {product.currency}
               </Typography>
             </Box>
           </Box>

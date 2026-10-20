@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Typography,
@@ -13,25 +13,67 @@ import {
   useTheme,
   Avatar,
   Divider,
+  Alert,
 } from "@mui/material";
 import { Wallet, LogOut, ChevronRight, X } from "lucide-react";
-import { NAVIGATION_ITEMS } from "@/constants";
+import { getAddress } from "ethers";
+import { NAVIGATION_ITEMS, routers, SEPOLIA_CHAIN_ID } from "@/constants";
+import { getMarketplaceOwner } from "@/services/marketplaceAdminService";
 import { useThemeMode } from "../ThemeContext";
 import { useWallet } from "../context/WalletContext";
 
-const SidebarContent: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const { mode } = useThemeMode();
-  const { connected, address, network, connect, disconnect, connecting } =
-    useWallet();
+  const {
+    connected,
+    address,
+    chainId,
+    network,
+    connect,
+    disconnect,
+    connecting,
+  } = useWallet();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminCheckError, setAdminCheckError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
+  useEffect(() => {
+    let active = true;
+    setIsAdmin(false);
+    setAdminCheckError("");
+
+    if (!connected || !address || chainId !== SEPOLIA_CHAIN_ID) {
+      return () => {
+        active = false;
+      };
+    }
+
+    getMarketplaceOwner()
+      .then((owner) => {
+        if (active) {
+          setIsAdmin(getAddress(address) === owner);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setAdminCheckError(
+          error instanceof Error
+            ? error.message
+            : "Could not verify marketplace administrator.",
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [connected, address, chainId]);
+
   const handleNavClick = (path: string) => {
     navigate(path);
-    setSidebarOpen(false);
+    onClose?.();
   };
 
   const shortenAddress = (addr: string) =>
@@ -78,7 +120,7 @@ const SidebarContent: React.FC = () => {
           </Typography>
         </Box>
         {isMobile && (
-          <IconButton onClick={() => setSidebarOpen(false)} sx={{ ml: "auto" }}>
+          <IconButton onClick={onClose} sx={{ ml: "auto" }}>
             <X size={20} />
           </IconButton>
         )}
@@ -87,7 +129,9 @@ const SidebarContent: React.FC = () => {
       <Divider />
 
       <List sx={{ flex: 1, px: 1.5, py: 2 }}>
-        {NAVIGATION_ITEMS.map((item) => {
+        {NAVIGATION_ITEMS.filter(
+          (item) => item.path !== routers.ADMIN || isAdmin,
+        ).map((item) => {
           const isActive =
             location.pathname === item.path ||
             (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -145,6 +189,11 @@ const SidebarContent: React.FC = () => {
             </ListItem>
           );
         })}
+        {adminCheckError && (
+          <Alert severity="error" sx={{ mt: 1, fontSize: "0.75rem" }}>
+            Could not verify admin access: {adminCheckError}
+          </Alert>
+        )}
       </List>
 
       <Divider />

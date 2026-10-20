@@ -64,6 +64,14 @@ configuration in `.env.local` for local development, and do not commit API keys
 or other private credentials. Vite bundles `VITE_` variables into client-side
 code, so they must not contain secrets that need to remain private.
 
+The configured marketplace contract must support this frontend's fee model:
+`listingFee()` and owner-only `setListingFee(uint256)` for the PHX fee charged
+on product creation, plus `platformFeeBps()` for the buyer fee. Its purchase
+implementation must collect the product price and percentage fee from the
+buyer while transferring the full listed price to the seller. Deploy a
+contract implementing this behavior before using the updated fee controls; the
+frontend cannot enforce seller payouts by itself.
+
 The backend API base URL is also configured in `src/constants/config.ts`. Its
 current environment lookup uses `REACT_APP_API_BASE_URL`; Vite does not expose
 `REACT_APP_` variables by default. To override the API URL through the

@@ -336,7 +336,7 @@ return filtered;
                       top: 8,
                       right: 8,
                       bgcolor:
-                        product.status === "active"
+                        product.status === "Active"
                           ? "rgba(16, 185, 129, 0.9)"
                           : "rgba(245, 158, 11, 0.9)",
                       color: "#fff",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -19,7 +19,11 @@ import { motion } from "framer-motion";
 import { Upload, X, Sparkles, AlertCircle } from "lucide-react";
 import { useThemeMode } from "../ThemeContext";
 import { useWallet } from "../context/WalletContext";
-import { listProduct, uploadProductImage } from "@/services/productService";
+import {
+  getFixedListingFee,
+  listProduct,
+  uploadProductImage,
+} from "@/services/productService";
 
 const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
@@ -41,6 +45,28 @@ const CreateProductPage: React.FC = () => {
   >("idle");
   const [submitError, setSubmitError] = useState("");
   const [transactionHash, setTransactionHash] = useState("");
+  const [fixedListingFee, setFixedListingFee] = useState<string | null>(null);
+  const [listingFeeError, setListingFeeError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    getFixedListingFee()
+      .then((fee) => {
+        if (active) setFixedListingFee(fee);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setListingFeeError(
+          error instanceof Error
+            ? error.message
+            : "Could not load the fixed listing fee from the marketplace.",
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -142,11 +168,16 @@ const CreateProductPage: React.FC = () => {
           Create Listing
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          List a digital product on PHX Marketplace. A PHX creation fee is
-          calculated from the listing price and current platform fee rate. If
-          needed, approve the fee in your wallet before confirming the listing
-          transaction.
+          List a digital product on PHX Marketplace. Creating a product costs a
+          fixed listing fee of {fixedListingFee ?? "loading..."} PHX, regardless
+          of the product price. Approve the fee in your wallet before confirming
+          the listing transaction.
         </Typography>
+        {listingFeeError && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            Could not load the current fixed listing fee: {listingFeeError}
+          </Alert>
+        )}
 
         <Card sx={{ p: { xs: 2, md: 4 } }}>
           <CardContent sx={{ p: 0 }}>

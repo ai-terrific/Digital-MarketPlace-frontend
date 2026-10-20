@@ -70,7 +70,7 @@ const Layout: React.FC = () => {
           },
         }}
       >
-        <SidebarContent />
+        <SidebarContent onClose={() => setSidebarOpen(false)} />
       </Drawer>
 
       {/* Main Content */}

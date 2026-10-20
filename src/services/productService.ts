@@ -316,15 +316,26 @@ export async function getProductDetails(productId: string) {
   const id = BigInt(productId);
   if (id < 0n) throw new Error("Invalid product ID.");
 
-  const [rawProduct, feeBps] = await Promise.all([
+  const [result, feeBps] = await Promise.all([
     readMarketplace.getProduct(id),
     readMarketplace.platformFeeBps(),
   ]);
+  const rawProduct = result as unknown as ContractProduct;
+  const buyerFee = (rawProduct.price * (feeBps as bigint)) / 10_000n;
 
   return {
-    product: mapContractProduct(rawProduct as unknown as ContractProduct),
+    product: mapContractProduct(rawProduct),
+    listedPrice: formatUnits(rawProduct.price, 18),
+    platformFee: formatUnits(buyerFee, 18),
+    total: formatUnits(rawProduct.price + buyerFee, 18),
     platformFeeBps: Number(feeBps),
   };
+}
+
+export async function getFixedListingFee(): Promise<string> {
+  const fee = (await readMarketplace.listingFee()) as bigint;
+
+  return formatUnits(fee, 18);
 }
 
 export async function transferProduct(
@@ -418,17 +429,22 @@ export async function buyProduct(productId: string, signer: JsonRpcSigner) {
   }
 
   const token = new Contract(tokenAddress, phoenixTokenArtifact, signer);
+  const platformFeeBps = (await marketplace.platformFeeBps()) as bigint;
+  const fee = (price * platformFeeBps) / 10_000n;
+  const total = price + fee;
   const [balance, allowance] = await Promise.all([
     token.balanceOf(buyer) as Promise<bigint>,
     token.allowance(buyer, MARKETPLACE_ADDRESS) as Promise<bigint>,
   ]);
 
-  if (balance < price) {
-    throw new Error("Insufficient PHX balance to purchase this product.");
+  if (balance < total) {
+    throw new Error(
+      "Insufficient PHX balance to purchase this product and pay the platform fee.",
+    );
   }
 
-  if (allowance < price) {
-    const approval = await token.approve(MARKETPLACE_ADDRESS, price);
+  if (allowance < total) {
+    const approval = await token.approve(MARKETPLACE_ADDRESS, total);
     const approvalReceipt = await approval.wait();
     if (!approvalReceipt || approvalReceipt.status !== 1) {
       throw new Error("PHX approval transaction failed.");
@@ -476,8 +492,7 @@ export async function listProduct(product: ProductType, signer: JsonRpcSigner) {
 
   const marketplace = getMarketplace(signer);
   const walletAddress = await signer.getAddress();
-  const platformFeeBps = (await marketplace.platformFeeBps()) as bigint;
-  const creationFee = (price * platformFeeBps) / 10_000n;
+  const creationFee = (await marketplace.listingFee()) as bigint;
 
   if (creationFee > 0n) {
     const tokenAddress = (await marketplace.paymentToken()) as string;
