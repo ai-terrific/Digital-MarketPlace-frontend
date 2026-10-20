@@ -10,7 +10,7 @@ export interface Product {
   currency: "PHX" | "ETH";
   seller: string;
   image: string;
-  status: "active" | "sold" | "transferred" | "unlisted";
+  status: "Active" | "Sold" | "Transferred" | "Inactive";
   specifications?: Record<string, string>;
   createdAt?: string;
   owner?: string;

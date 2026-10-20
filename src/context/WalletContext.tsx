@@ -128,9 +128,11 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({
       const ethereum = getMetaMaskProvider();
 
       // Connecting always requires an explicit request from the app UI.
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
+      await ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
       });
+      const accounts = await ethereum.request({ method: "eth_accounts" });
       if (!accounts?.length) {
         throw new Error("No wallet account was authorized.");
       }
@@ -180,9 +182,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-async function ensureSepolia(
-  ethereum: ReturnType<typeof getMetaMaskProvider>,
-) {
+async function ensureSepolia(ethereum: ReturnType<typeof getMetaMaskProvider>) {
   const chainId = await ethereum.request({ method: "eth_chainId" });
   if (Number(chainId) === SEPOLIA_CHAIN_ID) return;
 

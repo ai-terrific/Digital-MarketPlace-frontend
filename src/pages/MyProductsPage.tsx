@@ -62,8 +62,8 @@ const MyProductsPage: React.FC = () => {
       setSoldProducts([]);
       setTransferredProducts([]);
       setLoading(false);
-      
-return;
+
+      return;
     }
 
     let active = true;
@@ -94,9 +94,9 @@ return;
     };
   }, [connected, address, reloadIndex]);
 
-  const myListings = products.filter((product) => product.status === "active");
+  const myListings = products.filter((product) => product.status === "Active");
   const ownedProducts = products.filter(
-    (product) => product.status !== "active",
+    (product) => product.status !== "Active",
   );
 
   const confirmTransfer = async () => {
@@ -317,7 +317,7 @@ return;
                         label={product.status}
                         size="small"
                         color={
-                          product.status === "active" ? "success" : "default"
+                          product.status === "Active" ? "success" : "default"
                         }
                       />
                     </Box>
@@ -424,7 +424,7 @@ return;
                 color="text.secondary"
                 sx={{ gridColumn: "1 / -1", textAlign: "center", py: 4 }}
               >
-                You do not own any unlisted products.
+                You do not own any inactive products.
               </Typography>
             )}
           </Box>

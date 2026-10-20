@@ -40,8 +40,8 @@ const AccountPage: React.FC = () => {
       setRecentTransactions([]);
       setBalances(null);
       setLoading(false);
-      
-return;
+
+      return;
     }
 
     let active = true;
@@ -76,9 +76,9 @@ return;
     };
   }, [connected, address, reloadIndex]);
 
-  const myListings = products.filter((product) => product.status === "active");
+  const myListings = products.filter((product) => product.status === "Active");
   const ownedProducts = products.filter(
-    (product) => product.status !== "active",
+    (product) => product.status !== "Active",
   );
 
   if (!connected) {
@@ -354,7 +354,7 @@ return;
                   <Chip
                     label={p.status}
                     size="small"
-                    color={p.status === "active" ? "success" : "default"}
+                    color={p.status === "Active" ? "success" : "default"}
                   />
                 </Box>
               </CardContent>
@@ -383,7 +383,7 @@ return;
         >
           {!loading && !loadError && ownedProducts.length === 0 && (
             <Typography color="text.secondary" sx={{ gridColumn: "1 / -1" }}>
-              You do not own any unlisted products.
+              You do not own any inactive products.
             </Typography>
           )}
           {ownedProducts.map((p) => (

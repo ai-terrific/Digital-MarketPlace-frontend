@@ -142,8 +142,10 @@ const CreateProductPage: React.FC = () => {
           Create Listing
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          List a digital product on PHX Marketplace. Publishing may require an
-          on-chain transaction and network fee.
+          List a digital product on PHX Marketplace. A PHX creation fee is
+          calculated from the listing price and current platform fee rate. If
+          needed, approve the fee in your wallet before confirming the listing
+          transaction.
         </Typography>
 
         <Card sx={{ p: { xs: 2, md: 4 } }}>
@@ -390,7 +392,7 @@ const CreateProductPage: React.FC = () => {
 
             {submitStatus === "success" && (
               <Alert severity="success" sx={{ mt: 2 }}>
-                Transaction confirmed. The seller and price were recorded on the
+                Transaction confirmed. The product listing was recorded on the
                 marketplace contract.
                 {transactionHash && (
                   <Typography

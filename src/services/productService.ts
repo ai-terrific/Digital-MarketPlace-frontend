@@ -58,7 +58,7 @@ function mapContractProduct(item: ContractProduct): Product {
     image: item.imageURI.startsWith("ipfs://")
       ? `https://harlequin-voluntary-carp-306.mypinata.cloud/ipfs/${item.imageURI.slice(7).replace(/^ipfs\//, "")}`
       : item.imageURI,
-    status: item.listed ? "active" : "unlisted",
+    status: item.listed ? "Active" : "Inactive",
     owner: item.currentOwner,
   };
 }
@@ -84,8 +84,8 @@ export async function getProducts(
 
 export async function getProductCount(): Promise<number> {
   const count = (await readMarketplace.getProductCount()) as bigint;
-  
-return Number(count);
+
+  return Number(count);
 }
 
 export async function getWalletBalances(owner: string): Promise<{
@@ -476,6 +476,31 @@ export async function listProduct(product: ProductType, signer: JsonRpcSigner) {
 
   const marketplace = getMarketplace(signer);
   const walletAddress = await signer.getAddress();
+  const platformFeeBps = (await marketplace.platformFeeBps()) as bigint;
+  const creationFee = (price * platformFeeBps) / 10_000n;
+
+  if (creationFee > 0n) {
+    const tokenAddress = (await marketplace.paymentToken()) as string;
+    const token = new Contract(tokenAddress, phoenixTokenArtifact, signer);
+    const [balance, allowance] = await Promise.all([
+      token.balanceOf(walletAddress) as Promise<bigint>,
+      token.allowance(walletAddress, MARKETPLACE_ADDRESS) as Promise<bigint>,
+    ]);
+
+    if (balance < creationFee) {
+      throw new Error(
+        "Insufficient PHX balance to pay the product creation fee.",
+      );
+    }
+
+    if (allowance < creationFee) {
+      const approval = await token.approve(MARKETPLACE_ADDRESS, creationFee);
+      const approvalReceipt = await approval.wait();
+      if (!approvalReceipt || approvalReceipt.status !== 1) {
+        throw new Error("PHX approval transaction failed.");
+      }
+    }
+  }
 
   const transaction = await marketplace.createProduct(
     walletAddress,
