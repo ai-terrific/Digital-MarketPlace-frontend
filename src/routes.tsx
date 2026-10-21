@@ -1,12 +1,12 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import Layout from "@/layout";
-import MarketplacePage from "@/pages/MarketplacePage";
-import ProductDetailsPage from "@/pages/ProductDetailsPage";
-import CreateProductPage from "@/pages/CreateProductPage";
-import AccountPage from "@/pages/AccountPage";
-import MyProductsPage from "@/pages/MyProductsPage";
-import AdminPage from "@/pages/AdminPage";
+import Marketplace from "@/pages/Marketplace";
+import ProductDetails from "@/pages/ProductDetails";
+import CreateProduct from "@/pages/CreateProduct";
+import Account from "@/pages/Account";
+import MyProducts from "@/pages/MyProducts";
+import Admin from "@/pages/Admin";
 import { routers } from "@/constants";
 
 const routes = createBrowserRouter([
@@ -16,27 +16,27 @@ const routes = createBrowserRouter([
     children: [
       {
         path: routers.LANDING,
-        element: <MarketplacePage />,
+        element: <Marketplace />,
       },
       {
         path: routers.PRODUCT,
-        element: <ProductDetailsPage />,
+        element: <ProductDetails />,
       },
       {
         path: routers.CREATE,
-        element: <CreateProductPage />,
+        element: <CreateProduct />,
       },
       {
         path: routers.ACCOUNT,
-        element: <AccountPage />,
+        element: <Account />,
       },
       {
         path: routers.MYPRODUCTS,
-        element: <MyProductsPage />,
+        element: <MyProducts />,
       },
       {
         path: routers.ADMIN,
-        element: <AdminPage />,
+        element: <Admin />,
       },
     ],
   },

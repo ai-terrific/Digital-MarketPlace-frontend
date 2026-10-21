@@ -28,9 +28,9 @@ const ProductDetailsPage: React.FC = () => {
   const { connected, address, connect, getSigner } = useWallet();
   const [product, setProduct] = useState<Product | null>(null);
   const [platformFeeBps, setPlatformFeeBps] = useState<number>(0);
-  const [listedPrice, setListedPrice] = useState("0");
-  const [platformFee, setPlatformFee] = useState("0");
-  const [total, setTotal] = useState("0");
+  const [listedPrice, setListedPrice] = useState<string>("0");
+  const [platformFee, setPlatformFee] = useState<string>("0");
+  const [total, setTotal] = useState<string>("0");
   const [loading, setLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string>("");
   const [reloadVersion, setReloadVersion] = useState<number>(0);
