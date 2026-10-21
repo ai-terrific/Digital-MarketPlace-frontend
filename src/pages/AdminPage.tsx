@@ -32,43 +32,44 @@ import {
   updateMarketplaceFee,
   withdrawMarketplaceFees,
 } from "@/services/marketplaceAdminService";
-import type { AdminActivity, MarketplaceAdminData } from "@/types";
+import type {
+  AdminActivity,
+  MarketplaceAdminData,
+  submitStatusType,
+} from "@/types";
 
 const AdminPage: React.FC = () => {
   const { connected, address, connect, connecting, getSigner, network } =
     useWallet();
-  const [newListingFee, setNewListingFee] = useState("25");
-  const [newFee, setNewFee] = useState("5");
+  const [newListingFee, setNewListingFee] = useState<string>("25");
+  const [newFee, setNewFee] = useState<string>("5");
   const [adminData, setAdminData] = useState<MarketplaceAdminData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [reloadIndex, setReloadIndex] = useState(0);
-  const [feeUpdating, setFeeUpdating] = useState(false);
-  const [listingFeeUpdating, setListingFeeUpdating] = useState(false);
-  const [listingFeeStatus, setListingFeeStatus] = useState<
-    "idle" | "pending" | "success" | "error"
-  >("idle");
-  const [feeStatus, setFeeStatus] = useState<
-    "idle" | "pending" | "success" | "error"
-  >("idle");
-  const [withdrawing, setWithdrawing] = useState(false);
-  const [withdrawStatus, setWithdrawStatus] = useState<
-    "idle" | "pending" | "success" | "error"
-  >("idle");
-  const [feeError, setFeeError] = useState("");
-  const [listingFeeError, setListingFeeError] = useState("");
-  const [withdrawError, setWithdrawError] = useState("");
-  const [feeTransactionHash, setFeeTransactionHash] = useState("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string>("");
+  const [reloadIndex, setReloadIndex] = useState<number>(0);
+  const [feeUpdating, setFeeUpdating] = useState<boolean>(false);
+  const [listingFeeUpdating, setListingFeeUpdating] = useState<boolean>(false);
+  const [listingFeeStatus, setListingFeeStatus] =
+    useState<submitStatusType>("idle");
+  const [feeStatus, setFeeStatus] = useState<submitStatusType>("idle");
+  const [withdrawing, setWithdrawing] = useState<boolean>(false);
+  const [withdrawStatus, setWithdrawStatus] =
+    useState<submitStatusType>("idle");
+  const [feeError, setFeeError] = useState<string>("");
+  const [listingFeeError, setListingFeeError] = useState<string>("");
+  const [withdrawError, setWithdrawError] = useState<string>("");
+  const [feeTransactionHash, setFeeTransactionHash] = useState<string>("");
   const [listingFeeTransactionHash, setListingFeeTransactionHash] =
-    useState("");
-  const [withdrawTransactionHash, setWithdrawTransactionHash] = useState("");
+    useState<string>("");
+  const [withdrawTransactionHash, setWithdrawTransactionHash] =
+    useState<string>("");
 
   useEffect(() => {
     if (!connected || !address) {
       setAdminData(null);
       setLoading(false);
-      
-return;
+
+      return;
     }
 
     let active = true;
@@ -150,8 +151,8 @@ return;
     if (!Number.isFinite(fee) || fee < 0 || fee > maxFee) {
       setFeeError(`Enter a fee between 0 and ${maxFee}%.`);
       setFeeStatus("error");
-      
-return;
+
+      return;
     }
 
     setFeeUpdating(true);
@@ -331,7 +332,6 @@ return;
           transactions.
         </Typography>
 
-        {/* Overview Cards */}
         <Box
           sx={{
             display: "grid",
@@ -400,7 +400,6 @@ return;
           </Card>
         </Box>
 
-        {/* Update Fixed Listing Fee */}
         <Card sx={{ mb: 4, p: 3 }}>
           <Typography
             variant="h6"
@@ -486,7 +485,6 @@ return;
           )}
         </Card>
 
-        {/* Update Buyer Platform Fee */}
         <Card sx={{ mb: 4, p: 3 }}>
           <Typography
             variant="h6"
@@ -501,10 +499,10 @@ return;
             <DollarSign size={20} /> Update Buyer Platform Fee
           </Typography>
           <Alert severity="info" sx={{ mb: 2 }}>
-            Buyers pay this percentage in addition to the listed price;
-            sellers receive the full listed price. Current fee: {currentFee}%.
-            Allowed range: 0-{maxFee}%. Updating requires a wallet transaction
-            and gas fees.
+            Buyers pay this percentage in addition to the listed price; sellers
+            receive the full listed price. Current fee: {currentFee}%. Allowed
+            range: 0-{maxFee}%. Updating requires a wallet transaction and gas
+            fees.
           </Alert>
           <Box
             sx={{
@@ -570,7 +568,6 @@ return;
           )}
         </Card>
 
-        {/* Withdrawal */}
         <Card sx={{ mb: 4, p: 3 }}>
           <Typography
             variant="h6"
@@ -646,7 +643,6 @@ return;
           )}
         </Card>
 
-        {/* Recent Transactions */}
         <Card sx={{ p: 3 }}>
           <Typography
             variant="h6"
@@ -717,12 +713,6 @@ return;
             </Typography>
           )}
         </Card>
-
-        {/* <Alert severity="warning" sx={{ mt: 3 }}>
-          Admin controls are enforced by the smart contract. Frontend
-          authorization checks are supplementary — the contract's access control
-          is authoritative.
-        </Alert> */}
       </motion.div>
     </Box>
   );

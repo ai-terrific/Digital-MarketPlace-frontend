@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ShoppingCart, ExternalLink, Shield } from "lucide-react";
 import { useThemeMode } from "../ThemeContext";
 import { useWallet } from "../context/WalletContext";
-import type { Product } from "../types";
+import type { Product, txStatusType } from "../types";
 import { buyProduct, getProductDetails } from "@/services/productService";
 
 const ProductDetailsPage: React.FC = () => {
@@ -27,19 +27,17 @@ const ProductDetailsPage: React.FC = () => {
   const { mode } = useThemeMode();
   const { connected, address, connect, getSigner } = useWallet();
   const [product, setProduct] = useState<Product | null>(null);
-  const [platformFeeBps, setPlatformFeeBps] = useState(0);
+  const [platformFeeBps, setPlatformFeeBps] = useState<number>(0);
   const [listedPrice, setListedPrice] = useState("0");
   const [platformFee, setPlatformFee] = useState("0");
   const [total, setTotal] = useState("0");
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [reloadVersion, setReloadVersion] = useState(0);
-  const [buyDialog, setBuyDialog] = useState(false);
-  const [txStatus, setTxStatus] = useState<
-    "idle" | "pending" | "success" | "failed"
-  >("idle");
-  const [txError, setTxError] = useState("");
-  const [transactionHash, setTransactionHash] = useState("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string>("");
+  const [reloadVersion, setReloadVersion] = useState<number>(0);
+  const [buyDialog, setBuyDialog] = useState<boolean>(false);
+  const [txStatus, setTxStatus] = useState<txStatusType>("idle");
+  const [txError, setTxError] = useState<string>("");
+  const [transactionHash, setTransactionHash] = useState<string>("");
 
   useEffect(() => {
     let active = true;
@@ -164,7 +162,6 @@ const ProductDetailsPage: React.FC = () => {
       </Button>
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-        {/* Product Image */}
         <Box sx={{ flex: { xs: "1 1 100%", md: "1 1 55%" }, minWidth: 0 }}>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Box
@@ -194,7 +191,6 @@ const ProductDetailsPage: React.FC = () => {
           </motion.div>
         </Box>
 
-        {/* Product Info */}
         <Box sx={{ flex: { xs: "1 1 100%", md: "1 1 40%" }, minWidth: 0 }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -215,7 +211,6 @@ const ProductDetailsPage: React.FC = () => {
               {product.description}
             </Typography>
 
-            {/* Price */}
             <Card sx={{ mb: 3, p: 2 }}>
               <Box
                 sx={{
@@ -278,7 +273,6 @@ const ProductDetailsPage: React.FC = () => {
               </Box>
             </Card>
 
-            {/* Seller Info */}
             <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
               <Shield size={16} color="#0EA5E9" />
               <Typography variant="body2" color="text.secondary">
@@ -289,7 +283,6 @@ const ProductDetailsPage: React.FC = () => {
               </Typography>
             </Box>
 
-            {/* Status */}
             <Box sx={{ display: "flex", gap: 1, mb: 3 }}>
               <Chip
                 label={`Status: ${product.status}`}
@@ -308,7 +301,6 @@ const ProductDetailsPage: React.FC = () => {
               </Alert>
             )}
 
-            {/* Buy Button */}
             <Button
               variant="contained"
               size="large"
@@ -327,7 +319,6 @@ const ProductDetailsPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Purchase Dialog */}
       <Dialog
         open={buyDialog}
         onClose={() => {

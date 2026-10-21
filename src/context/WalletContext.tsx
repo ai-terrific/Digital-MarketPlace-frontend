@@ -62,7 +62,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({
     network: null,
     chainId: null,
   });
-  const [connecting, setConnecting] = useState(false);
+  const [connecting, setConnecting] = useState<boolean>(false);
 
   useEffect(() => {
     const ethereum = window.ethereum;

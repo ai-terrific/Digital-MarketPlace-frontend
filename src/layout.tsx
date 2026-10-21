@@ -20,7 +20,7 @@ import { useWallet } from "./context/WalletContext";
 import SidebarContent from "@/components/SideBar";
 
 const Layout: React.FC = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const { mode, toggleTheme } = useThemeMode();
   const { connected, address, network, connect, connecting } = useWallet();
   const navigate = useNavigate();
@@ -38,7 +38,6 @@ const Layout: React.FC = () => {
         bgcolor: "background.default",
       }}
     >
-      {/* Desktop Sidebar */}
       {!isMobile && (
         <Box
           sx={{
@@ -56,7 +55,6 @@ const Layout: React.FC = () => {
         </Box>
       )}
 
-      {/* Mobile Drawer */}
       <Drawer
         anchor="left"
         open={sidebarOpen}
@@ -73,11 +71,9 @@ const Layout: React.FC = () => {
         <SidebarContent onClose={() => setSidebarOpen(false)} />
       </Drawer>
 
-      {/* Main Content */}
       <Box
         sx={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}
       >
-        {/* Top Bar */}
         <AppBar
           position="sticky"
           elevation={0}
@@ -164,7 +160,6 @@ const Layout: React.FC = () => {
           </Toolbar>
         </AppBar>
 
-        {/* Page Content */}
         <Box
           component="main"
           sx={{
@@ -178,7 +173,6 @@ const Layout: React.FC = () => {
           <Outlet />
         </Box>
 
-        {/* Footer */}
         <Box
           component="footer"
           sx={{

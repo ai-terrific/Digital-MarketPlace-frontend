@@ -33,8 +33,8 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     disconnect,
     connecting,
   } = useWallet();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminCheckError, setAdminCheckError] = useState("");
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [adminCheckError, setAdminCheckError] = useState<string>("");
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();

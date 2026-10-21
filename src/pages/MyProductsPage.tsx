@@ -26,9 +26,11 @@ import {
   Eye,
   PlusCircle,
   Wallet,
+  Power,
 } from "lucide-react";
 import { useWallet } from "../context/WalletContext";
 import {
+  activateProduct,
   getProductActivity,
   getProductsByOwner,
   transferProduct,
@@ -39,22 +41,26 @@ import type { Product, ProductActivity } from "@/types";
 const MyProductsPage: React.FC = () => {
   const navigate = useNavigate();
   const { connected, address, connect, getSigner } = useWallet();
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState<number>(0);
   const [transferDialog, setTransferDialog] = useState<string | null>(null);
-  const [transferAddress, setTransferAddress] = useState("");
+  const [transferAddress, setTransferAddress] = useState<string>("");
   const [editProduct, setEditProduct] = useState<Product | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editDescription, setEditDescription] = useState("");
+  const [editName, setEditName] = useState<string>("");
+  const [editDescription, setEditDescription] = useState<string>("");
+  const [activationProduct, setActivationProduct] = useState<Product | null>(
+    null,
+  );
+  const [activationPrice, setActivationPrice] = useState<string>("");
   const [products, setProducts] = useState<Product[]>([]);
   const [soldProducts, setSoldProducts] = useState<ProductActivity[]>([]);
   const [transferredProducts, setTransferredProducts] = useState<
     ProductActivity[]
   >([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [actionError, setActionError] = useState("");
-  const [actionBusy, setActionBusy] = useState(false);
-  const [reloadIndex, setReloadIndex] = useState(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string>("");
+  const [actionError, setActionError] = useState<string>("");
+  const [actionBusy, setActionBusy] = useState<boolean>(false);
+  const [reloadIndex, setReloadIndex] = useState<number>(0);
 
   useEffect(() => {
     if (!connected || !address) {
@@ -135,6 +141,24 @@ const MyProductsPage: React.FC = () => {
     } catch (error) {
       setActionError(
         error instanceof Error ? error.message : "Product update failed.",
+      );
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
+  const confirmActivate = async () => {
+    if (!activationProduct) return;
+    setActionBusy(true);
+    setActionError("");
+    try {
+      const signer = await getSigner();
+      await activateProduct(activationProduct.id, activationPrice, signer);
+      setActivationProduct(null);
+      setReloadIndex((index) => index + 1);
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? error.message : "Product activation failed.",
       );
     } finally {
       setActionBusy(false);
@@ -259,13 +283,15 @@ const MyProductsPage: React.FC = () => {
             {loadError}
           </Alert>
         )}
-        {actionError && !transferDialog && !editProduct && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {actionError}
-          </Alert>
-        )}
+        {actionError &&
+          !transferDialog &&
+          !editProduct &&
+          !activationProduct && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {actionError}
+            </Alert>
+          )}
 
-        {/* My Listings */}
         {tab === 0 && (
           <Box
             sx={{
@@ -358,7 +384,6 @@ const MyProductsPage: React.FC = () => {
           </Box>
         )}
 
-        {/* Owned Products */}
         {tab === 1 && (
           <Box
             sx={{
@@ -397,6 +422,9 @@ const MyProductsPage: React.FC = () => {
                           ? new Date(product.createdAt).toLocaleDateString()
                           : "On-chain"}
                       </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Price: {product.price} {product.currency}
+                      </Typography>
                     </Box>
                     <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
                       <Button
@@ -414,6 +442,19 @@ const MyProductsPage: React.FC = () => {
                       >
                         Transfer
                       </Button>
+                      <Button
+                        size="small"
+                        startIcon={<Power size={14} />}
+                        variant="outlined"
+                        disabled={actionBusy}
+                        onClick={() => {
+                          setActivationProduct(product);
+                          setActivationPrice(String(product.price));
+                          setActionError("");
+                        }}
+                      >
+                        Activate
+                      </Button>
                     </Box>
                   </CardContent>
                 </Box>
@@ -430,7 +471,6 @@ const MyProductsPage: React.FC = () => {
           </Box>
         )}
 
-        {/* Sold */}
         {tab === 2 && (
           <Box
             sx={{
@@ -505,7 +545,6 @@ const MyProductsPage: React.FC = () => {
           </Box>
         )}
 
-        {/* Transferred */}
         {tab === 3 && (
           <Box
             sx={{
@@ -557,7 +596,6 @@ const MyProductsPage: React.FC = () => {
         )}
       </motion.div>
 
-      {/* Transfer Dialog */}
       <Dialog
         open={!!transferDialog}
         onClose={() => {
@@ -603,6 +641,63 @@ const MyProductsPage: React.FC = () => {
             onClick={confirmTransfer}
           >
             {actionBusy ? "Transferring..." : "Confirm Transfer"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(activationProduct)}
+        onClose={() => {
+          if (!actionBusy) setActivationProduct(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Activate Product</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Set the price buyers will pay for{" "}
+            {activationProduct?.name ?? "this product"}.
+          </Typography>
+          <TextField
+            fullWidth
+            type="number"
+            label="Listing Price (PHX)"
+            value={activationPrice}
+            onChange={(event) => setActivationPrice(event.target.value)}
+            slotProps={{ htmlInput: { min: 0, step: "any" } }}
+            error={
+              activationPrice.trim() !== "" &&
+              (!Number.isFinite(Number(activationPrice)) ||
+                Number(activationPrice) <= 0)
+            }
+            helperText="Enter a price greater than zero."
+            sx={{ mt: 1 }}
+          />
+          {actionError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {actionError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setActivationProduct(null)}
+            disabled={actionBusy}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={confirmActivate}
+            disabled={
+              !activationPrice.trim() ||
+              !Number.isFinite(Number(activationPrice)) ||
+              Number(activationPrice) <= 0 ||
+              actionBusy
+            }
+          >
+            {actionBusy ? "Activating..." : "Activate"}
           </Button>
         </DialogActions>
       </Dialog>

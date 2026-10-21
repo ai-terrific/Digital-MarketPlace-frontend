@@ -371,6 +371,41 @@ export async function transferProduct(
   return receipt.hash;
 }
 
+export async function activateProduct(
+  productId: string,
+  price: string,
+  signer: JsonRpcSigner,
+): Promise<string> {
+  const id = BigInt(productId);
+  if (id < 0n) throw new Error("Invalid product ID.");
+  if (!price.trim()) throw new Error("Product price is required.");
+
+  const listingPrice = parseUnits(price, 18);
+  if (listingPrice <= 0n) {
+    throw new Error("Product price must be positive to activate it.");
+  }
+
+  await requireSepolia(signer);
+
+  const marketplace = getMarketplace(signer);
+  const sender = await signer.getAddress();
+  const product = (await marketplace.getProduct(id)) as ContractProduct;
+  if (product.currentOwner.toLowerCase() !== sender.toLowerCase()) {
+    throw new Error("Only the current product owner can activate it.");
+  }
+  if (product.listed) {
+    throw new Error("This product is already active.");
+  }
+
+  const transaction = await marketplace.listProduct(id, listingPrice);
+  const receipt = await transaction.wait();
+  if (!receipt || receipt.status !== 1) {
+    throw new Error("Product activation transaction failed.");
+  }
+
+  return receipt.hash;
+}
+
 export async function updateProductDetails(
   productId: string,
   name: string,

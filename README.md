@@ -7,7 +7,7 @@ manage product listings, and uses Pimlico for smart-account transactions.
 ## Features
 
 - Browse the marketplace and view product details.
-- Create listings and manage your products.
+- Create listings, reactivate inactive products you own, and manage your products.
 - Connect a MetaMask wallet on Sepolia.
 - View wallet and account information.
 - Access marketplace administration features, including fee management.

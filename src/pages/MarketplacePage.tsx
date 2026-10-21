@@ -19,12 +19,15 @@ import {
   useTheme,
   Alert,
   CircularProgress,
+  Pagination,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useThemeMode } from "../ThemeContext";
 import { MARKETPLACE_PAGE_SIZE } from "@/constants";
-import type { Product } from "../types";
+import type { Product, sortType } from "../types";
 import { getProductCount, getProducts } from "@/services/productService";
 
 const MarketplacePage: React.FC = () => {
@@ -32,15 +35,16 @@ const MarketplacePage: React.FC = () => {
   const { mode } = useThemeMode();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("newest");
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [search, setSearch] = useState<string>("");
+  const [sort, setSort] = useState<sortType>("newest");
+  const [activeOnly, setActiveOnly] = useState<boolean>(false);
+  const [filterOpen, setFilterOpen] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [reloadIndex, setReloadIndex] = useState(0);
+  const [totalProducts, setTotalProducts] = useState<number>(0);
+  const [page, setPage] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string>("");
+  const [reloadIndex, setReloadIndex] = useState<number>(0);
 
   useEffect(() => {
     let active = true;
@@ -69,8 +73,8 @@ const MarketplacePage: React.FC = () => {
     };
 
     void loadPage();
-    
-return () => {
+
+    return () => {
       active = false;
     };
   }, [page, reloadIndex]);
@@ -84,6 +88,9 @@ return () => {
           p.description.toLowerCase().includes(search.toLowerCase()),
       );
     }
+    if (activeOnly) {
+      filtered = filtered.filter((product) => product.status === "Active");
+    }
     switch (sort) {
       case "price-asc":
         filtered.sort((a, b) => a.price - b.price);
@@ -95,9 +102,9 @@ return () => {
         filtered.sort((a, b) => Number(BigInt(b.id) - BigInt(a.id)));
         break;
     }
-    
-return filtered;
-  }, [products, search, sort]);
+
+    return filtered;
+  }, [products, search, sort, activeOnly]);
 
   const FilterPanel = () => (
     <Box sx={{ p: 2 }}>
@@ -135,6 +142,20 @@ return filtered;
         </Select>
       </FormControl>
 
+      <FormControlLabel
+        control={
+          <Switch
+            checked={activeOnly}
+            onChange={(event) => {
+              setActiveOnly(event.target.checked);
+              setPage(0);
+            }}
+          />
+        }
+        label="Show active products only"
+        sx={{ mb: 2 }}
+      />
+
       <Button
         variant="outlined"
         fullWidth
@@ -142,6 +163,8 @@ return filtered;
         onClick={() => {
           setSearch("");
           setSort("newest");
+          setActiveOnly(false);
+          setPage(0);
         }}
       >
         Reset Filters
@@ -151,7 +174,6 @@ return filtered;
 
   return (
     <Box>
-      {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography
           variant="h3"
@@ -164,14 +186,16 @@ return filtered;
         </Typography>
       </Box>
 
-      {/* Search and Filters Bar */}
       <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
         <TextField
           fullWidth
           size="small"
           placeholder="Search products..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(0);
+          }}
           slotProps={{
             input: {
               startAdornment: (
@@ -197,6 +221,18 @@ return filtered;
                 <MenuItem value="price-desc">Price ↓</MenuItem>
               </Select>
             </FormControl>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={activeOnly}
+                  onChange={(event) => {
+                    setActiveOnly(event.target.checked);
+                    setPage(0);
+                  }}
+                />
+              }
+              label="Active only"
+            />
           </>
         )}
         {isMobile && (
@@ -210,7 +246,6 @@ return filtered;
         )}
       </Box>
 
-      {/* Mobile Filter Drawer */}
       <Drawer
         anchor="right"
         open={filterOpen}
@@ -220,7 +255,6 @@ return filtered;
         <FilterPanel />
       </Drawer>
 
-      {/* Results Count */}
       <Box
         sx={{
           display: "flex",
@@ -231,16 +265,21 @@ return filtered;
       >
         <Typography variant="body2" color="text.secondary">
           {filteredProducts.length} product
-          {filteredProducts.length !== 1 ? "s" : ""} found
+          {filteredProducts.length !== 1 ? "s" : ""} shown on this page
         </Typography>
         {search && (
-          <Button size="small" onClick={() => setSearch("")}>
+          <Button
+            size="small"
+            onClick={() => {
+              setSearch("");
+              setPage(0);
+            }}
+          >
             Clear filters
           </Button>
         )}
       </Box>
 
-      {/* Product Grid */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress size={28} />
@@ -405,27 +444,18 @@ return filtered;
           sx={{
             display: "flex",
             justifyContent: "center",
-            alignItems: "center",
-            gap: 2,
             mt: 4,
           }}
         >
-          <Button
-            disabled={page === 0}
-            onClick={() => setPage((value) => value - 1)}
-          >
-            Previous
-          </Button>
-          <Typography variant="body2" color="text.secondary">
-            Page {page + 1} of{" "}
-            {Math.ceil(totalProducts / MARKETPLACE_PAGE_SIZE)}
-          </Typography>
-          <Button
-            disabled={(page + 1) * MARKETPLACE_PAGE_SIZE >= totalProducts}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            Next
-          </Button>
+          <Pagination
+            count={Math.ceil(totalProducts / MARKETPLACE_PAGE_SIZE)}
+            page={page + 1}
+            onChange={(_, value) => setPage(value - 1)}
+            color="primary"
+            showFirstButton
+            showLastButton
+            aria-label="Marketplace product pages"
+          />
         </Box>
       )}
     </Box>

@@ -24,12 +24,20 @@ import {
   listProduct,
   uploadProductImage,
 } from "@/services/productService";
+import { currencyType, submitStatusType } from "@/types";
+
+interface formData {
+  name: string;
+  description: string;
+  price: string;
+  currency: currencyType;
+}
 
 const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
   const { mode } = useThemeMode();
   const { connected, address, connect, getSigner } = useWallet();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<formData>({
     name: "",
     description: "",
     price: "",
@@ -38,15 +46,13 @@ const CreateProductPage: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageURI, setImageURI] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<
-    "idle" | "pending" | "success" | "error"
-  >("idle");
-  const [submitError, setSubmitError] = useState("");
-  const [transactionHash, setTransactionHash] = useState("");
+  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [submitStatus, setSubmitStatus] = useState<submitStatusType>("idle");
+  const [submitError, setSubmitError] = useState<string>("");
+  const [transactionHash, setTransactionHash] = useState<string>("");
   const [fixedListingFee, setFixedListingFee] = useState<string | null>(null);
-  const [listingFeeError, setListingFeeError] = useState("");
+  const [listingFeeError, setListingFeeError] = useState<string>("");
 
   useEffect(() => {
     let active = true;
@@ -181,7 +187,6 @@ const CreateProductPage: React.FC = () => {
 
         <Card sx={{ p: { xs: 2, md: 4 } }}>
           <CardContent sx={{ p: 0 }}>
-            {/* Product Name */}
             <TextField
               fullWidth
               label="Product Name"
@@ -193,7 +198,6 @@ const CreateProductPage: React.FC = () => {
               sx={{ mb: 3 }}
             />
 
-            {/* Description */}
             <TextField
               fullWidth
               multiline
@@ -209,7 +213,6 @@ const CreateProductPage: React.FC = () => {
               sx={{ mb: 3 }}
             />
 
-            {/* Price and Currency */}
             <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap" }}>
               <Box
                 sx={{
@@ -249,7 +252,6 @@ const CreateProductPage: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Image Upload */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 Product Image
@@ -383,7 +385,6 @@ const CreateProductPage: React.FC = () => {
               )}
             </Box>
 
-            {/* Info Alert */}
             <Alert
               icon={<AlertCircle size={16} />}
               severity="info"
@@ -394,7 +395,6 @@ const CreateProductPage: React.FC = () => {
               IPFS image URI.
             </Alert>
 
-            {/* Actions */}
             <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
               <Button
                 variant="outlined"

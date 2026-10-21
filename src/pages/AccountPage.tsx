@@ -18,7 +18,7 @@ import {
   getWalletActivity,
   getWalletBalances,
 } from "@/services/productService";
-import type { Product, WalletActivity } from "@/types";
+import type { balanceType, Product, WalletActivity } from "@/types";
 
 const AccountPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,12 +27,10 @@ const AccountPage: React.FC = () => {
   const [recentTransactions, setRecentTransactions] = useState<
     WalletActivity[]
   >([]);
-  const [balances, setBalances] = useState<{ phx: number; eth: number } | null>(
-    null,
-  );
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [reloadIndex, setReloadIndex] = useState(0);
+  const [balances, setBalances] = useState<balanceType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string>("");
+  const [reloadIndex, setReloadIndex] = useState<number>(0);
 
   useEffect(() => {
     if (!connected || !address) {
@@ -137,7 +135,6 @@ const AccountPage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        {/* Wallet Info */}
         <Card sx={{ mb: 4, p: 3 }}>
           <Box
             sx={{
@@ -254,7 +251,6 @@ const AccountPage: React.FC = () => {
           </Card>
         </Box>
 
-        {/* Quick Actions */}
         <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}>
           <Button
             variant="contained"
@@ -279,7 +275,6 @@ const AccountPage: React.FC = () => {
           </Button>
         </Box>
 
-        {/* My Listings */}
         <Typography
           variant="h5"
           sx={{ fontFamily: "'Space Grotesk', sans-serif", mb: 2 }}
@@ -362,7 +357,6 @@ const AccountPage: React.FC = () => {
           ))}
         </Box>
 
-        {/* Owned Products */}
         <Typography
           variant="h5"
           sx={{ fontFamily: "'Space Grotesk', sans-serif", mb: 2 }}
@@ -431,7 +425,6 @@ const AccountPage: React.FC = () => {
           ))}
         </Box>
 
-        {/* Recent Transactions */}
         <Box
           sx={{
             display: "flex",

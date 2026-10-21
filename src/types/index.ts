@@ -131,3 +131,16 @@ export interface NavigationItem {
   label: string;
   icon: LucideIcon;
 }
+
+export type sortType = "newest" | "price-asc" | "price-desc";
+
+export type submitStatusType = "idle" | "pending" | "success" | "error";
+
+export type txStatusType = "idle" | "pending" | "success" | "failed";
+
+export type currencyType = "PHX" | "ETH";
+
+export interface balanceType {
+  phx: number;
+  eth: number;
+}
