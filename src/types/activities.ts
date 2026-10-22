@@ -12,7 +12,7 @@ export interface ProductActivity {
   counterparty: string;
   transactionHash: string;
   blockNumber: number;
-  value?: number;
+  value?: string;
 }
 
 export interface WalletActivity {
@@ -23,7 +23,7 @@ export interface WalletActivity {
   counterparty: string;
   transactionHash: string;
   blockNumber: number;
-  value?: number;
+  value?: string;
 }
 
 export interface AdminActivity {

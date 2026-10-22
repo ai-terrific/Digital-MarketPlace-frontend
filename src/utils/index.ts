@@ -1,5 +1,6 @@
-import type { formData } from "@/types";
+import type { CreateProductFormData } from "@/types";
 import type { ChangeEvent } from "react";
+import { EIP1193Provider } from "viem";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -25,15 +26,19 @@ export const errorHandler = (error: unknown, fallback: string): string => {
   );
 };
 
-export const validation = (form: formData, imageURI: string | null) => {
+export const isValidProductPrice = (price: string): boolean =>
+  /^\d+(\.\d{1,18})?$/.test(price.trim()) &&
+  Number.isFinite(Number(price)) &&
+  Number(price) > 0;
+
+export const validation = (
+  form: CreateProductFormData,
+  imageURI: string | null,
+) => {
   const errs: Record<string, string> = {};
   if (!form.name.trim()) errs.name = "Product name is required";
   if (!form.description.trim()) errs.description = "Description is required";
-  if (
-    !/^\d+(\.\d{1,18})?$/.test(form.price.trim()) ||
-    !Number.isFinite(Number(form.price)) ||
-    Number(form.price) <= 0
-  ) {
+  if (!isValidProductPrice(form.price)) {
     errs.price = "Valid price is required";
   }
   if (!imageURI) errs.image = "Upload a product image to IPFS";
@@ -84,5 +89,18 @@ export const getSelectedImage = (
 
 export const shortenAddress = (addr: string | null) => {
   if (addr) return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+
   return null;
 };
+
+export const validateFee = (fee: string) =>
+  !/^\d+(\.\d{1,18})?$/.test(fee.trim());
+
+export function getMetaMaskProvider(): EIP1193Provider {
+  const ethereum = window.ethereum;
+  if (!ethereum) {
+    throw new Error("Please install MetaMask.");
+  }
+
+  return ethereum;
+}

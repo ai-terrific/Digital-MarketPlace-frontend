@@ -1,6 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 
-export type ThemeMode = "light" | "dark";
+export enum ThemeMode {
+  Light = "light",
+  Dark = "dark",
+}
 
 export interface ThemeContextType {
   mode: ThemeMode;
@@ -13,9 +16,17 @@ export interface NavigationItem {
   icon: LucideIcon;
 }
 
-export type StatusType = "idle" | "pending" | "success" | "error";
+export enum StatusType {
+  Idle = "idle",
+  Pending = "pending",
+  Success = "success",
+  Error = "error",
+}
 
-export type CurrencyType = "PHX" | "ETH";
+export enum CurrencyType {
+  PHX = "PHX",
+  ETH = "ETH",
+}
 
 export interface CreateProductFormData {
   name: string;

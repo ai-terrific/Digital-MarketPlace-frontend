@@ -1,12 +1,17 @@
-import { CurrencyType } from "./ui";
+import type { CurrencyType } from "./ui";
 
-export type ProductStatus = "Active" | "Sold" | "Transferred" | "Inactive";
+export enum ProductStatus {
+  Active = "Active",
+  Sold = "Sold",
+  Transferred = "Transferred",
+  Inactive = "Inactive",
+}
 
 export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  price: string;
   currency: CurrencyType;
   seller: string;
   image: string;

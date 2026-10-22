@@ -1,6 +1,6 @@
 import { Box, Button, Chip, Typography } from "@mui/material";
 import { Upload, X } from "lucide-react";
-import { useThemeMode } from "@/ThemeContext";
+import { useThemeMode } from "@/context/ThemeContext";
 import { PRODUCT_IMAGE_ACCEPT } from "@/utils";
 
 interface ProductImageFieldProps {

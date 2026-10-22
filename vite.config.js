@@ -5,6 +5,13 @@ import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  envPrefix: [
+    "VITE_",
+    "REACT_APP_API_BASE_URL",
+    "MARKETPLACE_CONTRACT_ADDRESS",
+    "PHX_TOKEN_ADDRESS",
+    "WEB_RPC_URL",
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

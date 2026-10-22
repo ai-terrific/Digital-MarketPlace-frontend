@@ -1,6 +1,6 @@
 import React from "react";
 import { RouterProvider } from "react-router-dom";
-import { ThemeProvider } from "./ThemeContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { DialogProvider } from "./context/DialogContext";
 import { WalletProvider } from "./context/WalletContext";
 import routes from "./routes";

@@ -12,7 +12,7 @@ import { DollarSign } from "lucide-react";
 import React, { useState } from "react";
 import { useWallet } from "@/context/WalletContext";
 import { updateMarketplaceFee } from "@/services/marketplaceAdminService";
-import type { StatusType } from "@/types";
+import { StatusType } from "@/types";
 
 interface UpdateBuyerPlatformFeeProps {
   currentFee: number;
@@ -28,7 +28,7 @@ const UpdateBuyerPlatformFee: React.FC<UpdateBuyerPlatformFeeProps> = ({
   const { getSigner } = useWallet();
   const [newFee, setNewFee] = useState(String(currentFee));
   const [feeUpdating, setFeeUpdating] = useState(false);
-  const [feeStatus, setFeeStatus] = useState<StatusType>("idle");
+  const [feeStatus, setFeeStatus] = useState<StatusType>(StatusType.Idle);
   const [feeError, setFeeError] = useState("");
   const [feeTransactionHash, setFeeTransactionHash] = useState("");
 
@@ -36,26 +36,26 @@ const UpdateBuyerPlatformFee: React.FC<UpdateBuyerPlatformFeeProps> = ({
     const fee = Number(newFee);
     if (!Number.isFinite(fee) || fee < 0 || fee > maxFee) {
       setFeeError(`Enter a fee between 0 and ${maxFee}%.`);
-      setFeeStatus("error");
+      setFeeStatus(StatusType.Error);
 
       return;
     }
 
     setFeeUpdating(true);
-    setFeeStatus("pending");
+    setFeeStatus(StatusType.Pending);
     setFeeError("");
     setFeeTransactionHash("");
     try {
       const signer = await getSigner();
       const hash = await updateMarketplaceFee(parseUnits(newFee, 2), signer);
       setFeeTransactionHash(hash);
-      setFeeStatus("success");
+      setFeeStatus(StatusType.Success);
       setReloadIndex((index) => index + 1);
     } catch (error) {
       setFeeError(
         error instanceof Error ? error.message : "Platform fee update failed.",
       );
-      setFeeStatus("error");
+      setFeeStatus(StatusType.Error);
     } finally {
       setFeeUpdating(false);
     }
@@ -94,7 +94,7 @@ const UpdateBuyerPlatformFee: React.FC<UpdateBuyerPlatformFeeProps> = ({
           value={newFee}
           onChange={(event) => {
             setNewFee(event.target.value);
-            setFeeStatus("idle");
+            setFeeStatus(StatusType.Idle);
             setFeeError("");
           }}
           size="small"
@@ -115,12 +115,12 @@ const UpdateBuyerPlatformFee: React.FC<UpdateBuyerPlatformFeeProps> = ({
         >
           {feeUpdating
             ? "Updating..."
-            : feeStatus === "success"
+            : feeStatus === StatusType.Success
               ? "Updated!"
               : "Update Fee"}
         </Button>
       </Box>
-      {feeStatus === "pending" && (
+      {feeStatus === StatusType.Pending && (
         <Box sx={{ mt: 2 }}>
           <LinearProgress />
           <Typography
@@ -132,7 +132,7 @@ const UpdateBuyerPlatformFee: React.FC<UpdateBuyerPlatformFeeProps> = ({
           </Typography>
         </Box>
       )}
-      {feeStatus === "success" && (
+      {feeStatus === StatusType.Success && (
         <Alert severity="success" sx={{ mt: 2 }}>
           Fee updated successfully. Transaction: {feeTransactionHash}
         </Alert>

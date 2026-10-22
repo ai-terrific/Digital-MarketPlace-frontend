@@ -16,10 +16,8 @@ export interface MarketplaceAdminData {
   activity: AdminActivity[];
 }
 
-export enum sortType {
+export enum SortType {
   Newest = "newest",
   PriceAsc = "price-asc",
   PriceDesc = "price-desc",
 }
-
-export type sortTypeUnion = `${sortType}`;

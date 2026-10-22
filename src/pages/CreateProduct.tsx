@@ -8,8 +8,8 @@ import {
   listProduct,
   uploadProductImage,
 } from "@/services/productService";
-import type { StatusType } from "@/types";
-import { PageDescription, PageTitle } from "@/components/core/Common";
+import { StatusType } from "@/types";
+import { PageDescription, PageTitle } from "@/components/Core/Common";
 import CreateProductForm from "@/components/CreateProduct/CreateProductForm";
 import {
   errorHandler,
@@ -19,7 +19,7 @@ import {
   validation,
 } from "@/utils";
 import { Alert } from "@mui/material";
-import { CreateProductFormData } from "@/types/ui";
+import { CreateProductFormData, CurrencyType } from "@/types/ui";
 
 const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
@@ -28,14 +28,14 @@ const CreateProductPage: React.FC = () => {
     name: "",
     description: "",
     price: "",
-    currency: "PHX",
+    currency: CurrencyType.PHX,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageURI, setImageURI] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<StatusType>("idle");
+  const [submitStatus, setSubmitStatus] = useState<StatusType>(StatusType.Idle);
   const [submitError, setSubmitError] = useState("");
   const [transactionHash, setTransactionHash] = useState("");
   const [fixedListingFee, setFixedListingFee] = useState<string | null>(null);
@@ -129,7 +129,7 @@ const CreateProductPage: React.FC = () => {
     }
 
     setSubmitting(true);
-    setSubmitStatus("pending");
+    setSubmitStatus(StatusType.Pending);
     setSubmitError("");
     setTransactionHash("");
 
@@ -146,10 +146,10 @@ const CreateProductPage: React.FC = () => {
         signer,
       );
       setTransactionHash(hash);
-      setSubmitStatus("success");
+      setSubmitStatus(StatusType.Success);
     } catch (error) {
       setSubmitError(errorHandler(error, "Product listing failed."));
-      setSubmitStatus("error");
+      setSubmitStatus(StatusType.Error);
     } finally {
       setSubmitting(false);
     }

@@ -3,9 +3,6 @@ export const routers = {
   MARKETPLACE: "/",
   PRODUCT: "/product/:id",
   CREATE: "/create",
-  HISTORY: "/history",
-  TRANSACTION_HISTORY: "/history/:txHash",
-  ACCOUNT: "/account",
-  MYPRODUCTS: "/my-products",
+  MY_PRODUCTS: "/my-products",
   ADMIN: "/admin",
 };

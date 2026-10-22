@@ -1,4 +1,4 @@
-import { ProductStatus } from "@/types";
+import type { ProductStatus } from "@/types";
 import { Chip } from "@mui/material";
 import React from "react";
 

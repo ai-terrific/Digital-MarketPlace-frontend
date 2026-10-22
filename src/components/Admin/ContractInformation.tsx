@@ -1,13 +1,13 @@
 import { Box, Card, Typography } from "@mui/material";
 import React from "react";
 
-interface ContractInformation {
+export interface ContractInformationType {
   name: string;
   value: string;
   icon: React.JSX.Element;
 }
 
-const ContractInformation: React.FC<ContractInformation> = ({
+const ContractInformation: React.FC<ContractInformationType> = ({
   name,
   value,
   icon,
@@ -21,9 +21,8 @@ const ContractInformation: React.FC<ContractInformation> = ({
         </Typography>
       </Box>
       <Typography
-        variant="body2"
+        variant="subtitle1"
         sx={{
-          fontFamily: "monospace",
           fontSize: "0.75rem",
           wordBreak: "break-all",
         }}

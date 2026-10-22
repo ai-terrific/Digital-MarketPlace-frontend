@@ -1,28 +1,16 @@
-import { useThemeMode } from "@/ThemeContext";
+import { useThemeMode } from "@/context/ThemeContext";
 import { Product } from "@/types";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import { Box, CardContent, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import StatusChip from "./core/StatusChip";
+import StatusChip from "../Core/StatusChip";
+import { ProductCard, ProductDescription, ProductName } from "./styled";
 
 const ProductItem = ({ product }: { product: Product }) => {
   const navigate = useNavigate();
   const { mode } = useThemeMode();
 
   return (
-    <Card
-      sx={{
-        cursor: "pointer",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        transition: "transform 0.2s, box-shadow 0.2s",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: "0 12px 40px rgba(14, 165, 233, 0.12)",
-        },
-      }}
-      onClick={() => navigate(`/product/${product.id}`)}
-    >
+    <ProductCard onClick={() => navigate(`/product/${product.id}`)}>
       <Box
         sx={{
           height: 180,
@@ -58,28 +46,10 @@ const ProductItem = ({ product }: { product: Product }) => {
           flexDirection: "column",
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{ fontWeight: 600, mb: 0.5, lineHeight: 1.3 }}
-        >
-          {product.name}
-        </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            fontSize: "0.8rem",
-            mb: 2,
-            flex: 1,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
+        <ProductName variant="subtitle2">{product.name}</ProductName>
+        <ProductDescription variant="body2" color="text.secondary">
           {product.description}
-        </Typography>
+        </ProductDescription>
         <Box
           sx={{
             display: "flex",
@@ -99,7 +69,7 @@ const ProductItem = ({ product }: { product: Product }) => {
           </Typography>
         </Box>
       </CardContent>
-    </Card>
+    </ProductCard>
   );
 };
 

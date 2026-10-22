@@ -15,7 +15,7 @@ import {
   WALLET_DISCONNECTED_STORAGE_KEY,
 } from "@/constants";
 import type { WalletContextType, WalletState } from "@/types";
-import { getMetaMaskProvider } from "@/utils/metamask";
+import { getMetaMaskProvider } from "@/utils";
 import { errorHandler } from "@/utils";
 
 function isWalletDisconnected() {

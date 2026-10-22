@@ -6,7 +6,8 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import { Dialog, DialogTitle } from "@mui/material";
+import { Dialog, DialogTitle, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import type { DialogProps } from "@mui/material";
 
 interface DialogConfig {
@@ -64,6 +65,18 @@ export const DialogProvider: React.FC<{ children: ReactNode }> = ({
         {dialog && (
           <>
             <DialogTitle>{dialog.title}</DialogTitle>
+            <IconButton
+              aria-label="close"
+              onClick={closeDialog}
+              sx={(theme) => ({
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: theme.palette.grey[500],
+              })}
+            >
+              <CloseIcon />
+            </IconButton>
             {dialog.content}
           </>
         )}

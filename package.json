@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 3000",
-    "build": "vite build",
+    "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext",
     "lint:error": "eslint src --quiet",

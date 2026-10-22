@@ -16,12 +16,14 @@ import {
   type ProductActivity,
   type ProductType,
   type WalletActivity,
+  CurrencyType,
+  ProductStatus,
 } from "@/types";
 import {
   ACTIVITY_LOOK_BACK_BLOCKS,
   API_ENDPOINTS,
   MARKETPLACE_ADDRESS,
-  VITE_PHX_TOKEN_ADDRESS,
+  PHX_TOKEN_ADDRESS,
   WEB_RPC_URL,
 } from "@/constants";
 import { getMarketplace } from "@/web3/marketplace";
@@ -86,13 +88,13 @@ function mapContractProduct(item: ContractProduct): Product {
     id: item.productId.toString(),
     name: item.name,
     description: item.description,
-    price: Number(formatUnits(item.price, 18)),
-    currency: "PHX",
+    price: formatUnits(item.price, 18),
+    currency: CurrencyType.PHX,
     seller: `${item.currentOwner.slice(0, 6)}...${item.currentOwner.slice(-4)}`,
     image: item.imageURI.startsWith("ipfs://")
       ? `https://harlequin-voluntary-carp-306.mypinata.cloud/ipfs/${item.imageURI.slice(7).replace(/^ipfs\//, "")}`
       : item.imageURI,
-    status: item.listed ? "Active" : "Inactive",
+    status: item.listed ? ProductStatus.Active : ProductStatus.Inactive,
     owner: item.currentOwner,
   };
 }
@@ -131,7 +133,7 @@ export async function getWalletBalances(owner: string): Promise<{
 }> {
   const normalizedOwner = getAddress(owner);
   const token = new Contract(
-    VITE_PHX_TOKEN_ADDRESS,
+    PHX_TOKEN_ADDRESS,
     phoenixTokenArtifact,
     readProvider,
   );
@@ -222,7 +224,7 @@ export async function getProductActivity(owner: string): Promise<{
           transactionHash: event.transactionHash,
           blockNumber: event.blockNumber,
           ...(kind === "sold"
-            ? { value: Number(formatUnits(parsed.args.price as bigint, 18)) }
+            ? { value: formatUnits(parsed.args.price as bigint, 18) }
             : {}),
         };
       }),
@@ -334,7 +336,7 @@ export async function getWalletActivity(
       const value =
         type === "transfer"
           ? undefined
-          : Number(formatUnits(parsed.args.price as bigint, 18));
+          : formatUnits(parsed.args.price as bigint, 18);
 
       return {
         id: `${event.transactionHash}-${event.index}`,

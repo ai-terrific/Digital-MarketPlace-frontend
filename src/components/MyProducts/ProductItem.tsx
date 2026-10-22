@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import StatusChip from "../core/StatusChip";
+import StatusChip from "../Core/StatusChip";
 import MyProductsAction from "./MyProductsAction";
 import OwnedProductsAction from "./OwnedProductsAction";
 

@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { Menu as MenuIcon, Sun, Moon, Wallet } from "lucide-react";
-import { useThemeMode } from "@/ThemeContext";
+import { useThemeMode } from "@/context/ThemeContext";
 import { useWallet } from "@/context/WalletContext";
 import { shortenAddress } from "@/utils";
 

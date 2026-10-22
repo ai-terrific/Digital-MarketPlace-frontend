@@ -1,5 +1,5 @@
 import { FC, Dispatch, SetStateAction } from "react";
-import { sortTypeUnion } from "@/types";
+import { SortType } from "@/types";
 import {
   Box,
   Button,
@@ -17,8 +17,8 @@ import {
 import { X } from "lucide-react";
 
 interface FilterPanelType {
-  sort: sortTypeUnion;
-  setSort: Dispatch<SetStateAction<sortTypeUnion>>;
+  sort: SortType;
+  setSort: Dispatch<SetStateAction<SortType>>;
   setFilterOpen: Dispatch<SetStateAction<boolean>>;
   activeOnly: boolean;
   setActiveOnly: Dispatch<SetStateAction<boolean>>;

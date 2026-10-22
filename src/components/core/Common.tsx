@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography, Pagination as MuiPagination } from "@mui/material";
+import type { TypographyProps } from "@mui/material";
 
 export const PageTitle: React.FC<{ title: string }> = ({ title }) => {
   return (
@@ -9,9 +10,11 @@ export const PageTitle: React.FC<{ title: string }> = ({ title }) => {
   );
 };
 
-export const PageDescription: React.FC<{
-  description: string;
-}> = ({ description, ...props }) => {
+export const PageDescription: React.FC<
+  Omit<TypographyProps, "children"> & {
+    description: string;
+  }
+> = ({ description, ...props }) => {
   return (
     <Typography
       variant="body1"

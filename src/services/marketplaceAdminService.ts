@@ -16,11 +16,11 @@ export async function getMarketplaceAdminData(): Promise<MarketplaceAdminData> {
     pendingPlatformFees,
     toBlock,
   ] = await Promise.all([
-    readMarketplace.owner() as Promise<string>,
-    readMarketplace.listingFee() as Promise<bigint>,
-    readMarketplace.platformFeeBps() as Promise<bigint>,
-    readMarketplace.MAX_FEE_BPS() as Promise<bigint>,
-    readMarketplace.pendingPlatformFees() as Promise<bigint>,
+    readMarketplace.owner(),
+    readMarketplace.listingFee(),
+    readMarketplace.platformFeeBps(),
+    readMarketplace.MAX_FEE_BPS(),
+    readMarketplace.pendingPlatformFees(),
     readProvider.getBlockNumber(),
   ]);
   const fromBlock = Math.max(0, toBlock - ACTIVITY_LOOK_BACK_BLOCKS + 1);

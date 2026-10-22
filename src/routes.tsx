@@ -18,16 +18,16 @@ const routes = createBrowserRouter([
         element: <Marketplace />,
       },
       {
-        path: routers.PRODUCT,
-        element: <ProductDetails />,
-      },
-      {
         path: routers.CREATE,
         element: <CreateProduct />,
       },
       {
-        path: routers.MYPRODUCTS,
+        path: routers.MY_PRODUCTS,
         element: <MyProducts />,
+      },
+      {
+        path: routers.PRODUCT,
+        element: <ProductDetails />,
       },
       {
         path: routers.ADMIN,

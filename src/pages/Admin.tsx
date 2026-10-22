@@ -18,7 +18,7 @@ import {
 import { useWallet } from "../context/WalletContext";
 import { getMarketplaceAdminData } from "@/services/marketplaceAdminService";
 import type { MarketplaceAdminData } from "@/types";
-import { PageDescription, PageTitle } from "@/components/core/Common";
+import { PageDescription, PageTitle } from "@/components/Core/Common";
 import ContractInformation from "@/components/Admin/ContractInformation";
 import UpdateListingFee from "@/components/Admin/UpdateListingFee";
 import UpdateBuyerPlatformFee from "@/components/Admin/UpdateBuyerPlatformFee";
@@ -72,6 +72,29 @@ const AdminPage: React.FC = () => {
   const currentFee = adminData ? adminData.platformFeeBps / 100 : 0;
   const maxFee = adminData ? adminData.maxFeeBps / 100 : 10;
   const withdrawableBalance = adminData?.pendingPlatformFees ?? 0;
+  const contractInformation = [
+    {
+      name: "Owner",
+      value: `${address?.slice(0, 12)}...${address?.slice(-8)}`,
+      icon: <Shield size={16} color="#0EA5E9" />,
+    },
+    {
+      name: "Buyer Platform Fee",
+      value: `${currentFee}%`,
+      icon: <DollarSign size={16} color="#0EA5E9" />,
+    },
+    {
+      name: "Withdrawable",
+      value: `${withdrawableBalance.toLocaleString()} PHX`,
+      icon: <Wallet size={16} color="#0EA5E9" />,
+    },
+    {
+      name: "Network",
+      value: network || "Ethereum Sepolia",
+      icon: <TrendingUp size={16} color="#0EA5E9" />,
+    },
+  ];
+
   if (!connected) {
     return (
       <Box sx={{ textAlign: "center", py: 8 }}>
@@ -181,7 +204,7 @@ const AdminPage: React.FC = () => {
           >
             Connected: {address?.slice(0, 10)}...{address?.slice(-8)}
             <br />
-            Owner: **********...********
+            Owner: {ownerAddress}
           </Alert>
         </motion.div>
       </Box>
@@ -212,26 +235,9 @@ const AdminPage: React.FC = () => {
             mb: 4,
           }}
         >
-          <ContractInformation
-            name="Owner"
-            value={`${address?.slice(0, 12)}...${address?.slice(-8)}`}
-            icon={<Shield size={16} color="#0EA5E9" />}
-          />
-          <ContractInformation
-            name="Buyer Platform Fee"
-            value={`${currentFee}%`}
-            icon={<DollarSign size={16} color="#0EA5E9" />}
-          />
-          <ContractInformation
-            name="Withdrawable"
-            value={`${withdrawableBalance.toLocaleString()} PHX`}
-            icon={<Wallet size={16} color="#0EA5E9" />}
-          />
-          <ContractInformation
-            name="Network"
-            value={`${network || "Ethereum Sepolia"}`}
-            icon={<TrendingUp size={16} color="#0EA5E9" />}
-          />
+          {contractInformation.map((information) => (
+            <ContractInformation key={information.name} {...information} />
+          ))}
         </Box>
 
         <UpdateListingFee

@@ -1,4 +1,13 @@
-import { CurrencyType } from "./ui";
+import type { CurrencyType, StatusType } from "./ui";
+
+export enum TransactionType {
+  Purchase = "purchase",
+  Listing = "listing",
+  Transfer = "transfer",
+  Update = "update",
+  Withdrawal = "withdrawal",
+  FeeUpdate = "fee-update",
+}
 
 export interface Transaction {
   id: string;
@@ -12,9 +21,6 @@ export interface Transaction {
   fee: number;
   txHash: string;
   timestamp: string;
-  status: "pending" | "confirmed" | "failed";
+  status: StatusType;
   blockNumber?: number;
 }
-
-export type TransactionType =
-  "purchase" | "listing" | "transfer" | "update" | "withdrawal" | "fee-update";

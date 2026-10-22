@@ -43,12 +43,17 @@ manage product listings, and uses Pimlico for smart-account transactions.
 
 The application reads the following Vite environment variables:
 
-| Variable | Purpose |
-| --- | --- |
-| `VITE_MARKETPLACE_CONTRACT_ADDRESS` | Marketplace contract address |
-| `VITE_PHX_TOKEN_ADDRESS` | PHX token contract address |
-| `VITE_SEPOLIA_RPC_URL` | RPC endpoint for Ethereum Sepolia |
-| `VITE_PIMLICO_API_KEY` | Pimlico API key used for smart-account transactions |
+| Variable                       | Purpose                                             |
+| ------------------------------ | --------------------------------------------------- |
+| `VITE_MARKETPLACE_CONTRACT_ADDRESS` | Marketplace contract address                    |
+| `MARKETPLACE_CONTRACT_ADDRESS` | Existing contract address setting (supported) |
+| `VITE_PHX_TOKEN_ADDRESS`            | PHX token contract address                       |
+| `PHX_TOKEN_ADDRESS` | Existing token address setting (supported) |
+| `VITE_SEPOLIA_RPC_URL`              | RPC endpoint for Ethereum Sepolia                |
+| `WEB_RPC_URL` | Existing RPC setting (supported) |
+| `VITE_API_BASE_URL`                 | Backend API base URL (preferred)                 |
+| `REACT_APP_API_BASE_URL`            | Existing API URL setting, supported for compatibility |
+| `VITE_PIMLICO_API_KEY`         | Pimlico API key used for smart-account transactions |
 
 Example `.env.local`:
 
@@ -56,6 +61,7 @@ Example `.env.local`:
 VITE_MARKETPLACE_CONTRACT_ADDRESS=0xYourMarketplaceContractAddress
 VITE_PHX_TOKEN_ADDRESS=0xYourPhxTokenAddress
 VITE_SEPOLIA_RPC_URL=https://your-sepolia-rpc-endpoint
+VITE_API_BASE_URL=http://localhost:8001
 VITE_PIMLICO_API_KEY=your-pimlico-api-key
 ```
 
@@ -72,31 +78,31 @@ buyer while transferring the full listed price to the seller. Deploy a
 contract implementing this behavior before using the updated fee controls; the
 frontend cannot enforce seller payouts by itself.
 
-The backend API base URL is also configured in `src/constants/config.ts`. Its
-current environment lookup uses `REACT_APP_API_BASE_URL`; Vite does not expose
-`REACT_APP_` variables by default. To override the API URL through the
-environment, update the application to use a `VITE_`-prefixed variable (or
-configure Vite's `envPrefix`) first.
+Vite exposes variables prefixed with `VITE_` to browser code. Existing
+unprefixed contract/RPC settings and `REACT_APP_API_BASE_URL` are explicitly
+exposed for compatibility. Create `.env.local` in the repository root and
+restart the dev server after changing it. Do not put private secrets in these
+variables; exposed values are bundled into the client.
 
 ## Available routes
 
-| Path | Page |
-| --- | --- |
-| `/` | Marketplace |
-| `/product/:id` | Product details |
-| `/create` | Create a product listing |
-| `/my-products` | Your product listings |
-| `/account` | Wallet and account |
-| `/admin` | Marketplace administration |
+| Path           | Page                       |
+| -------------- | -------------------------- |
+| `/`            | Marketplace                |
+| `/product/:id` | Product details            |
+| `/create`      | Create a product listing   |
+| `/my-products` | Your product listings      |
+| `/account`     | Wallet and account         |
+| `/admin`       | Marketplace administration |
 
 ## Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start the Vite development server on port 3000 |
-| `npm run build` | Build the production app into `dist/` |
-| `npm run typecheck` | Run the TypeScript type checker |
-| `npm run lint:error` | Run ESLint and report errors |
+| Command              | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| `npm run dev`        | Start the Vite development server on port 3000 |
+| `npm run build`      | Build the production app into `dist/`          |
+| `npm run typecheck`  | Run the TypeScript type checker                |
+| `npm run lint:error` | Run ESLint and report errors                   |
 
 ## Project structure
 

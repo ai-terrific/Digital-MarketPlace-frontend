@@ -9,11 +9,12 @@ import {
   Typography,
 } from "@mui/material";
 import { DollarSign } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useWallet } from "@/context/WalletContext";
 import { updateFixedListingFee } from "@/services/marketplaceAdminService";
 import { MarketplaceAdminData } from "@/types/marketplace";
 import { StatusType } from "@/types";
+import { validateFee } from "@/utils";
 
 interface UpdateListingFeeType {
   adminData: MarketplaceAdminData | null;
@@ -25,8 +26,12 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
   setReloadIndex,
 }) => {
   const { getSigner } = useWallet();
-  const [newListingFee, setNewListingFee] = useState<string>("25");
-  const [listingFeeStatus, setListingFeeStatus] = useState<StatusType>("idle");
+  const [newListingFee, setNewListingFee] = useState<string>(
+    adminData?.fixedListingFee ?? "0",
+  );
+  const [listingFeeStatus, setListingFeeStatus] = useState<StatusType>(
+    StatusType.Idle,
+  );
   const [listingFeeError, setListingFeeError] = useState<string>("");
   const [listingFeeUpdating, setListingFeeUpdating] = useState<boolean>(false);
   const [listingFeeTransactionHash, setListingFeeTransactionHash] =
@@ -34,10 +39,14 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
 
   const currentListingFee = adminData?.fixedListingFee ?? "0";
 
+  useEffect(() => {
+    if (adminData) setNewListingFee(adminData.fixedListingFee);
+  }, [adminData?.fixedListingFee]);
+
   const handleUpdateListingFee = async () => {
-    if (!adminData || !/^\d+(\.\d{1,18})?$/.test(newListingFee.trim())) {
+    if (!adminData || validateFee(newListingFee)) {
       setListingFeeError("Enter a valid PHX amount with up to 18 decimals.");
-      setListingFeeStatus("error");
+      setListingFeeStatus(StatusType.Error);
 
       return;
     }
@@ -48,14 +57,14 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
     }
 
     setListingFeeUpdating(true);
-    setListingFeeStatus("pending");
+    setListingFeeStatus(StatusType.Pending);
     setListingFeeError("");
     setListingFeeTransactionHash("");
     try {
       const signer = await getSigner();
       const hash = await updateFixedListingFee(fee, signer);
       setListingFeeTransactionHash(hash);
-      setListingFeeStatus("success");
+      setListingFeeStatus(StatusType.Success);
       setReloadIndex((index) => index + 1);
     } catch (error) {
       setListingFeeError(
@@ -63,7 +72,7 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
           ? error.message
           : "Fixed listing fee update failed.",
       );
-      setListingFeeStatus("error");
+      setListingFeeStatus(StatusType.Error);
     } finally {
       setListingFeeUpdating(false);
     }
@@ -102,7 +111,7 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
           value={newListingFee}
           onChange={(e) => {
             setNewListingFee(e.target.value);
-            setListingFeeStatus("idle");
+            setListingFeeStatus(StatusType.Idle);
             setListingFeeError("");
           }}
           size="small"
@@ -114,7 +123,7 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
           onClick={handleUpdateListingFee}
           disabled={
             listingFeeUpdating ||
-            !/^\d+(\.\d{1,18})?$/.test(newListingFee.trim()) ||
+            validateFee(newListingFee) ||
             (Number.isFinite(Number(newListingFee)) &&
               parseUnits(newListingFee || "0", 18) ===
                 parseUnits(currentListingFee, 18))
@@ -122,7 +131,7 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
         >
           {listingFeeUpdating
             ? "Updating..."
-            : listingFeeStatus === "success"
+            : listingFeeStatus === StatusType.Success
               ? "Updated!"
               : "Update Listing Fee"}
         </Button>
@@ -130,7 +139,7 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
           Current fixed fee: {currentListingFee} PHX
         </Typography>
       </Box>
-      {listingFeeStatus === "pending" && (
+      {listingFeeStatus === StatusType.Pending && (
         <Box sx={{ mt: 2 }}>
           <LinearProgress />
           <Typography
@@ -142,7 +151,7 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
           </Typography>
         </Box>
       )}
-      {listingFeeStatus === "success" && (
+      {listingFeeStatus === StatusType.Success && (
         <Alert severity="success" sx={{ mt: 2 }}>
           Fixed listing fee updated. Transaction: {listingFeeTransactionHash}
         </Alert>

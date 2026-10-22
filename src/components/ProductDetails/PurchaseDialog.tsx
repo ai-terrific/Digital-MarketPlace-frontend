@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ExternalLink } from "lucide-react";
-import type { Product, StatusType } from "@/types";
+import { StatusType, type Product } from "@/types";
 import { useDialog } from "@/context/DialogContext";
 import { useWallet } from "@/context/WalletContext";
 import { buyProduct } from "@/services/productService";
@@ -34,7 +34,7 @@ const PurchaseDialog: React.FC<PurchaseDialogProps> = ({
 }) => {
   const { closeDialog, setDialogCloseDisabled } = useDialog();
   const { connected, connect, getSigner } = useWallet();
-  const [status, setStatus] = useState<StatusType>("idle");
+  const [status, setStatus] = useState<StatusType>(StatusType.Idle);
   const [error, setError] = useState("");
   const [transactionHash, setTransactionHash] = useState("");
 
@@ -44,24 +44,24 @@ const PurchaseDialog: React.FC<PurchaseDialogProps> = ({
         await connect();
       } catch (cause) {
         setError(errorHandler(cause, "Wallet connection failed."));
-        setStatus("error");
+        setStatus(StatusType.Error);
       }
 
       return;
     }
 
-    setStatus("pending");
+    setStatus(StatusType.Pending);
     setError("");
     setDialogCloseDisabled(true);
     try {
       const signer = await getSigner();
       const hash = await buyProduct(product.id, signer);
       setTransactionHash(hash);
-      setStatus("success");
+      setStatus(StatusType.Success);
       onSuccess();
     } catch (cause) {
       setError(errorHandler(cause, "Purchase failed."));
-      setStatus("error");
+      setStatus(StatusType.Error);
     } finally {
       setDialogCloseDisabled(false);
     }

@@ -15,14 +15,14 @@ import {
   useTheme,
 } from "@mui/material";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { sortType, sortTypeUnion } from "@/types";
+import { SortType } from "@/types";
 import FilterPanel from "./FilterPanel";
 
 interface MarketplaceFiltersProps {
   search: string;
   setSearch: (value: string) => void;
-  sort: sortTypeUnion;
-  setSort: Dispatch<SetStateAction<sortTypeUnion>>;
+  sort: SortType;
+  setSort: Dispatch<SetStateAction<SortType>>;
   activeOnly: boolean;
   setActiveOnly: Dispatch<SetStateAction<boolean>>;
   filterOpen: boolean;
@@ -76,17 +76,13 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
               <Select
                 value={sort}
                 label="Sort"
-                onChange={(event) =>
-                  setSort(event.target.value as sortTypeUnion)
-                }
+                onChange={(event) => setSort(event.target.value)}
               >
-                {Object.entries(sortType).map(([key, value]) => (
-                  <MenuItem key={key} value={value as sortType}>
+                {Object.entries(SortType).map(([key, value]) => (
+                  <MenuItem key={key} value={value}>
                     {key}
                   </MenuItem>
                 ))}
-                <MenuItem value="price-asc">Price ↑</MenuItem>
-                <MenuItem value="price-desc">Price ↓</MenuItem>
               </Select>
             </FormControl>
             <FormControlLabel

@@ -16,7 +16,7 @@ import {
   updateProductDetails,
 } from "@/services/productService";
 import type { Product } from "@/types";
-import { errorHandler } from "@/utils";
+import { errorHandler, isValidProductPrice } from "@/utils";
 
 interface ProductDialogProps {
   product: Product;
@@ -170,10 +170,7 @@ export const ActivateProductDialog: React.FC<ProductDialogProps> = ({
   const [price, setPrice] = useState(String(product.price));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const validPrice =
-    Boolean(price.trim()) &&
-    Number.isFinite(Number(price)) &&
-    Number(price) > 0;
+  const validPrice = isValidProductPrice(price);
 
   const handleActivate = async () => {
     setBusy(true);
@@ -205,10 +202,7 @@ export const ActivateProductDialog: React.FC<ProductDialogProps> = ({
           value={price}
           onChange={(event) => setPrice(event.target.value)}
           slotProps={{ htmlInput: { min: 0, step: "any" } }}
-          error={
-            price.trim() !== "" &&
-            (!Number.isFinite(Number(price)) || Number(price) <= 0)
-          }
+          error={price.trim() !== "" && !isValidProductPrice(price)}
           helperText="Enter a price greater than zero."
           sx={{ mt: 1 }}
         />

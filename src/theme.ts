@@ -57,7 +57,7 @@ export const createAppTheme = (mode: "light" | "dark"): Theme => {
       button: {
         fontFamily: FONT_FAMILIES.body,
         fontWeight: 600,
-        textTransform: "none" as const,
+        textTransform: "none",
       },
     },
     shape: { borderRadius: 14 },

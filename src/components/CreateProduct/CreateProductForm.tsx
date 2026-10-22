@@ -13,13 +13,13 @@ import {
   Typography,
 } from "@mui/material";
 import { AlertCircle, Sparkles } from "lucide-react";
-import type { formData, StatusType } from "@/types";
+import type { CreateProductFormData, StatusType } from "@/types";
 import ProductImageField from "./ProductImageField";
 import TxPending from "./TxPending";
 
 interface CreateProductFormProps {
-  form: formData;
-  setForm: React.Dispatch<React.SetStateAction<formData>>;
+  form: CreateProductFormData;
+  setForm: React.Dispatch<React.SetStateAction<CreateProductFormData>>;
   errors: Record<string, string>;
   imagePreview: string | null;
   imageURI: string | null;

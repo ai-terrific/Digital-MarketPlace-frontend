@@ -1,16 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { parseUnits } from "ethers";
 import { Box } from "@mui/material";
 import { MARKETPLACE_PAGE_SIZE } from "@/constants";
-import { Product, sortTypeUnion } from "@/types";
+import { Product, SortType } from "@/types";
 import { getProductCount, getProducts } from "@/services/productService";
-import { PageTitle, Pagination } from "@/components/core/Common";
+import { PageTitle, Pagination } from "@/components/Core/Common";
 import Filters from "@/components/MarketPlace/MarketplaceFilters";
 import Results from "@/components/MarketPlace/MarketplaceResults";
 import { errorHandler } from "@/utils";
 
 const MarketplacePage: React.FC = () => {
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<sortTypeUnion>("newest");
+  const [sort, setSort] = useState<SortType>(SortType.Newest);
   const [activeOnly, setActiveOnly] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
@@ -62,13 +63,23 @@ const MarketplacePage: React.FC = () => {
     }
 
     switch (sort) {
-      case "price-asc":
-        filtered.sort((a, b) => a.price - b.price);
+      case SortType.PriceAsc:
+        filtered.sort((a, b) => {
+          const priceA = parseUnits(a.price, 18);
+          const priceB = parseUnits(b.price, 18);
+
+          return priceA < priceB ? -1 : priceA > priceB ? 1 : 0;
+        });
         break;
-      case "price-desc":
-        filtered.sort((a, b) => b.price - a.price);
+      case SortType.PriceDesc:
+        filtered.sort((a, b) => {
+          const priceA = parseUnits(a.price, 18);
+          const priceB = parseUnits(b.price, 18);
+
+          return priceA > priceB ? -1 : priceA < priceB ? 1 : 0;
+        });
         break;
-      case "newest":
+      case SortType.Newest:
         filtered.sort((a, b) => Number(b.id) - Number(a.id));
         break;
     }
@@ -78,7 +89,7 @@ const MarketplacePage: React.FC = () => {
 
   const resetFilters = () => {
     setSearch("");
-    setSort("newest");
+    setSort(SortType.Newest);
     setActiveOnly(false);
     setPage(0);
   };

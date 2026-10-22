@@ -14,7 +14,7 @@ import { Wallet } from "lucide-react";
 import React, { useState } from "react";
 import { useWallet } from "@/context/WalletContext";
 import { withdrawMarketplaceFees } from "@/services/marketplaceAdminService";
-import type { StatusType } from "@/types";
+import { StatusType } from "@/types";
 
 interface WithdrawPlatformFeesProps {
   balance: number;
@@ -29,21 +29,23 @@ const WithdrawPlatformFees: React.FC<WithdrawPlatformFeesProps> = ({
 }) => {
   const { getSigner } = useWallet();
   const [withdrawing, setWithdrawing] = useState(false);
-  const [withdrawStatus, setWithdrawStatus] = useState<StatusType>("idle");
+  const [withdrawStatus, setWithdrawStatus] = useState<StatusType>(
+    StatusType.Idle,
+  );
   const [withdrawError, setWithdrawError] = useState("");
   const [withdrawTransactionHash, setWithdrawTransactionHash] = useState("");
 
   const handleWithdraw = async () => {
     if (balance <= 0) return;
     setWithdrawing(true);
-    setWithdrawStatus("pending");
+    setWithdrawStatus(StatusType.Pending);
     setWithdrawError("");
     setWithdrawTransactionHash("");
     try {
       const signer = await getSigner();
       const hash = await withdrawMarketplaceFees(signer);
       setWithdrawTransactionHash(hash);
-      setWithdrawStatus("success");
+      setWithdrawStatus(StatusType.Success);
       setReloadIndex((index) => index + 1);
     } catch (error) {
       setWithdrawError(
@@ -51,7 +53,7 @@ const WithdrawPlatformFees: React.FC<WithdrawPlatformFeesProps> = ({
           ? error.message
           : "Platform fee withdrawal failed.",
       );
-      setWithdrawStatus("error");
+      setWithdrawStatus(StatusType.Error);
     } finally {
       setWithdrawing(false);
     }
