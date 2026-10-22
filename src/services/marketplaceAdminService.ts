@@ -1,11 +1,11 @@
 import { formatUnits, getAddress, JsonRpcProvider } from "ethers";
 import type { JsonRpcSigner } from "ethers";
 
-import { ACTIVITY_LOOKBACK_BLOCKS, VITE_SEPOLIA_RPC_URL } from "@/constants";
+import { ACTIVITY_LOOK_BACK_BLOCKS, WEB_RPC_URL } from "@/constants";
 import type { AdminActivity, MarketplaceAdminData } from "@/types";
 import { getMarketplace } from "@/web3/marketplace";
 
-const readProvider = new JsonRpcProvider(VITE_SEPOLIA_RPC_URL, 11155111);
+const readProvider = new JsonRpcProvider(WEB_RPC_URL, 11155111);
 const readMarketplace = getMarketplace(readProvider);
 export async function getMarketplaceAdminData(): Promise<MarketplaceAdminData> {
   const [
@@ -23,7 +23,7 @@ export async function getMarketplaceAdminData(): Promise<MarketplaceAdminData> {
     readMarketplace.pendingPlatformFees() as Promise<bigint>,
     readProvider.getBlockNumber(),
   ]);
-  const fromBlock = Math.max(0, toBlock - ACTIVITY_LOOKBACK_BLOCKS + 1);
+  const fromBlock = Math.max(0, toBlock - ACTIVITY_LOOK_BACK_BLOCKS + 1);
   const [
     created,
     listed,

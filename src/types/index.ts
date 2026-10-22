@@ -1,6 +1,16 @@
 import type { AxiosRequestConfig } from "axios";
 import type { JsonRpcSigner } from "ethers";
 import type { LucideIcon } from "lucide-react";
+import { CurrencyType } from "./ui";
+import { WalletActivityTypeEnum } from "./activities";
+
+export * from "./activities";
+export * from "./api";
+export * from "./marketplace";
+export * from "./product";
+export * from "./transactions";
+export * from "./ui";
+export * from "./wallet";
 
 export type ProductStatus = "Active" | "Sold" | "Transferred" | "Inactive";
 
@@ -9,7 +19,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  currency: "PHX" | "ETH";
+  currency: CurrencyType;
   seller: string;
   image: string;
   status: ProductStatus;
@@ -27,7 +37,7 @@ export interface Transaction {
   from: string;
   to: string;
   amount: number;
-  currency: "PHX" | "ETH";
+  currency: CurrencyType;
   fee: number;
   txHash: string;
   timestamp: string;
@@ -87,7 +97,7 @@ export interface ProductActivity {
 
 export interface WalletActivity {
   id: string;
-  type: "listing" | "purchase" | "sale" | "transfer";
+  type: WalletActivityTypeEnum;
   productId: string;
   productName: string;
   counterparty: string;
@@ -142,9 +152,7 @@ export enum sortType {
 
 export type sortTypeUnion = `${sortType}`;
 
-export type statusType = "idle" | "pending" | "success" | "error";
-
-export type currencyType = "PHX" | "ETH";
+export type currencyType = CurrencyType;
 
 export interface balanceType {
   phx: number;

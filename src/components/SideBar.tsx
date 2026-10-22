@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Typography,
@@ -21,7 +21,7 @@ import { NAVIGATION_ITEMS, routers, SEPOLIA_CHAIN_ID } from "@/constants";
 import { getMarketplaceOwner } from "@/services/marketplaceAdminService";
 import { useThemeMode } from "../ThemeContext";
 import { useWallet } from "../context/WalletContext";
-import { errorHandler } from "@/utils";
+import { errorHandler, shortenAddress } from "@/utils";
 
 const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const { mode } = useThemeMode();
@@ -75,8 +75,11 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     onClose?.();
   };
 
-  const shortenAddress = (addr: string) =>
-    `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  const navbarItems = useMemo(
+    () =>
+      NAVIGATION_ITEMS.filter((item) => item.path !== routers.ADMIN || isAdmin),
+    [],
+  );
 
   return (
     <Box
@@ -128,9 +131,7 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       <Divider />
 
       <List sx={{ flex: 1, px: 1.5, py: 2 }}>
-        {NAVIGATION_ITEMS.filter(
-          (item) => item.path !== routers.ADMIN || isAdmin,
-        ).map((item) => {
+        {navbarItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
             (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -225,7 +226,7 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                   variant="caption"
                   sx={{ display: "block", fontWeight: 600 }}
                 >
-                  {shortenAddress(address || "")}
+                  {shortenAddress(address)}
                 </Typography>
                 <Typography
                   variant="caption"

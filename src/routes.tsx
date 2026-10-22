@@ -4,7 +4,6 @@ import Layout from "@/layout";
 import Marketplace from "@/pages/Marketplace";
 import ProductDetails from "@/pages/ProductDetails";
 import CreateProduct from "@/pages/CreateProduct";
-import Account from "@/pages/Account";
 import MyProducts from "@/pages/MyProducts";
 import Admin from "@/pages/Admin";
 import { routers } from "@/constants";
@@ -25,10 +24,6 @@ const routes = createBrowserRouter([
       {
         path: routers.CREATE,
         element: <CreateProduct />,
-      },
-      {
-        path: routers.ACCOUNT,
-        element: <Account />,
       },
       {
         path: routers.MYPRODUCTS,

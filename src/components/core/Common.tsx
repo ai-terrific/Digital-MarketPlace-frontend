@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  Pagination as MuiPagination,
-} from "@mui/material";
+import { Box, Typography, Pagination as MuiPagination } from "@mui/material";
 
 export const PageTitle: React.FC<{ title: string }> = ({ title }) => {
   return (

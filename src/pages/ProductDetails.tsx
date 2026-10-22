@@ -9,8 +9,9 @@ import {
 } from "@mui/material";
 import { ArrowLeft } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
-import type { Product, statusType } from "@/types";
-import { buyProduct, getProductDetails } from "@/services/productService";
+import { useDialog } from "@/context/DialogContext";
+import type { Product } from "@/types";
+import { getProductDetails } from "@/services/productService";
 import { errorHandler } from "@/utils";
 import ProductOverview from "@/components/ProductDetails/ProductOverview";
 import PurchaseDialog from "@/components/ProductDetails/PurchaseDialog";
@@ -18,7 +19,8 @@ import PurchaseDialog from "@/components/ProductDetails/PurchaseDialog";
 const ProductDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { connected, address, connect, getSigner } = useWallet();
+  const { address } = useWallet();
+  const { openDialog } = useDialog();
   const [product, setProduct] = useState<Product | null>(null);
   const [platformFeeBps, setPlatformFeeBps] = useState(0);
   const [listedPrice, setListedPrice] = useState("0");
@@ -27,10 +29,6 @@ const ProductDetailsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [reloadVersion, setReloadVersion] = useState(0);
-  const [buyDialog, setBuyDialog] = useState(false);
-  const [txStatus, setTxStatus] = useState<statusType>("idle");
-  const [txError, setTxError] = useState("");
-  const [transactionHash, setTransactionHash] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -69,35 +67,6 @@ const ProductDetailsPage: React.FC = () => {
       active = false;
     };
   }, [id, reloadVersion]);
-
-  const handlePurchase = async () => {
-    if (!product) return;
-    if (!connected) {
-      await connect();
-
-      return;
-    }
-
-    setTxStatus("pending");
-    setTxError("");
-    setTransactionHash("");
-    try {
-      const signer = await getSigner();
-      const hash = await buyProduct(product.id, signer);
-      setTransactionHash(hash);
-      setTxStatus("success");
-      setReloadVersion((version) => version + 1);
-    } catch (error) {
-      setTxError(errorHandler(error, "Purchase failed."));
-      setTxStatus("error");
-    }
-  };
-
-  const closePurchaseDialog = () => {
-    setBuyDialog(false);
-    setTxStatus("idle");
-    setTxError("");
-  };
 
   if (loading) {
     return (
@@ -158,21 +127,25 @@ const ProductDetailsPage: React.FC = () => {
         platformFee={platformFee}
         platformFeeBps={platformFeeBps}
         total={total}
-        onPurchase={() => setBuyDialog(true)}
-      />
-      <PurchaseDialog
-        open={buyDialog}
-        product={product}
-        listedPrice={listedPrice}
-        platformFee={platformFee}
-        platformFeeBps={platformFeeBps}
-        total={total}
-        connected={connected}
-        status={txStatus}
-        error={txError}
-        transactionHash={transactionHash}
-        onClose={closePurchaseDialog}
-        onPurchase={() => void handlePurchase()}
+        onPurchase={() =>
+          openDialog({
+            title: (
+              <Typography sx={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                Confirm Purchase
+              </Typography>
+            ),
+            content: (
+              <PurchaseDialog
+                product={product}
+                listedPrice={listedPrice}
+                platformFee={platformFee}
+                platformFeeBps={platformFeeBps}
+                total={total}
+                onSuccess={() => setReloadVersion((version) => version + 1)}
+              />
+            ),
+          })
+        }
       />
     </Box>
   );

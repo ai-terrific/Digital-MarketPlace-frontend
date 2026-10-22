@@ -13,21 +13,20 @@ import {
   Typography,
 } from "@mui/material";
 import { AlertCircle, Sparkles } from "lucide-react";
-import type { statusType } from "@/types";
-import type { CreateProductFormData } from "./types";
+import type { formData, StatusType } from "@/types";
 import ProductImageField from "./ProductImageField";
 import TxPending from "./TxPending";
 
 interface CreateProductFormProps {
-  form: CreateProductFormData;
-  setForm: React.Dispatch<React.SetStateAction<CreateProductFormData>>;
+  form: formData;
+  setForm: React.Dispatch<React.SetStateAction<formData>>;
   errors: Record<string, string>;
   imagePreview: string | null;
   imageURI: string | null;
   uploadingImage: boolean;
   submitting: boolean;
   connected: boolean;
-  submitStatus: statusType;
+  submitStatus: StatusType;
   submitError: string;
   transactionHash: string;
   onImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;

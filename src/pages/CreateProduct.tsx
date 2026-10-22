@@ -8,10 +8,9 @@ import {
   listProduct,
   uploadProductImage,
 } from "@/services/productService";
-import type { statusType } from "@/types";
+import type { StatusType } from "@/types";
 import { PageDescription, PageTitle } from "@/components/core/Common";
 import CreateProductForm from "@/components/CreateProduct/CreateProductForm";
-import type { CreateProductFormData } from "@/components/CreateProduct/types";
 import {
   errorHandler,
   getSelectedImage,
@@ -20,6 +19,7 @@ import {
   validation,
 } from "@/utils";
 import { Alert } from "@mui/material";
+import { CreateProductFormData } from "@/types/ui";
 
 const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ const CreateProductPage: React.FC = () => {
   const [imageURI, setImageURI] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<statusType>("idle");
+  const [submitStatus, setSubmitStatus] = useState<StatusType>("idle");
   const [submitError, setSubmitError] = useState("");
   const [transactionHash, setTransactionHash] = useState("");
   const [fixedListingFee, setFixedListingFee] = useState<string | null>(null);

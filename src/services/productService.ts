@@ -8,20 +8,21 @@ import {
 } from "ethers";
 import type { JsonRpcSigner } from "ethers";
 
-import type {
-  ContractProduct,
-  ImageUploadResponse,
-  Product,
-  ProductActivity,
-  ProductType,
-  WalletActivity,
+import {
+  WalletActivityTypeEnum,
+  type ContractProduct,
+  type ImageUploadResponse,
+  type Product,
+  type ProductActivity,
+  type ProductType,
+  type WalletActivity,
 } from "@/types";
 import {
-  ACTIVITY_LOOKBACK_BLOCKS,
+  ACTIVITY_LOOK_BACK_BLOCKS,
   API_ENDPOINTS,
   MARKETPLACE_ADDRESS,
   VITE_PHX_TOKEN_ADDRESS,
-  VITE_SEPOLIA_RPC_URL,
+  WEB_RPC_URL,
 } from "@/constants";
 import { getMarketplace } from "@/web3/marketplace";
 import phoenixTokenArtifact from "@/abi/PhoenixToken.json";
@@ -45,7 +46,7 @@ export async function uploadProductImage(file: File): Promise<string> {
   return result.url;
 }
 
-const readProvider = new JsonRpcProvider(VITE_SEPOLIA_RPC_URL, 11155111);
+const readProvider = new JsonRpcProvider(WEB_RPC_URL, 11155111);
 const readMarketplace = getMarketplace(readProvider);
 
 function parseProductId(productId: string): bigint {
@@ -173,7 +174,7 @@ export async function getProductActivity(owner: string): Promise<{
 }> {
   const normalizedOwner = getAddress(owner);
   const toBlock = await readProvider.getBlockNumber();
-  const fromBlock = Math.max(0, toBlock - ACTIVITY_LOOKBACK_BLOCKS + 1);
+  const fromBlock = Math.max(0, toBlock - ACTIVITY_LOOK_BACK_BLOCKS + 1);
   const [soldEvents, transferEvents] = await Promise.all([
     readMarketplace.queryFilter(
       readMarketplace.filters.ProductSold(null, null, normalizedOwner),
@@ -245,7 +246,7 @@ export async function getWalletActivity(
 ): Promise<WalletActivity[]> {
   const normalizedOwner = getAddress(owner);
   const toBlock = await readProvider.getBlockNumber();
-  const fromBlock = Math.max(0, toBlock - ACTIVITY_LOOKBACK_BLOCKS + 1);
+  const fromBlock = Math.max(0, toBlock - ACTIVITY_LOOK_BACK_BLOCKS + 1);
   const [created, bought, sold, sent, received] = await Promise.all([
     readMarketplace.queryFilter(
       readMarketplace.filters.ProductCreated(null, normalizedOwner),
@@ -278,15 +279,21 @@ export async function getWalletActivity(
     [...bought, ...sold].map((event) => event.transactionHash),
   );
   const events = [
-    ...created.map((event) => ({ event, type: "listing" as const })),
-    ...bought.map((event) => ({ event, type: "purchase" as const })),
-    ...sold.map((event) => ({ event, type: "sale" as const })),
+    ...created.map((event) => ({
+      event,
+      type: WalletActivityTypeEnum.Listing,
+    })),
+    ...bought.map((event) => ({
+      event,
+      type: WalletActivityTypeEnum.Purchase,
+    })),
+    ...sold.map((event) => ({ event, type: WalletActivityTypeEnum.Sale })),
     ...sent
       .filter((event) => !saleTransactions.has(event.transactionHash))
-      .map((event) => ({ event, type: "transfer" as const })),
+      .map((event) => ({ event, type: WalletActivityTypeEnum.Transfer })),
     ...received
       .filter((event) => !saleTransactions.has(event.transactionHash))
-      .map((event) => ({ event, type: "transfer" as const })),
+      .map((event) => ({ event, type: WalletActivityTypeEnum.Transfer })),
   ];
   const productNames = new Map<string, Promise<string>>();
 
@@ -301,7 +308,7 @@ export async function getWalletActivity(
       const productId = parsed.args.productId as bigint;
       const id = productId.toString();
       let productName =
-        type === "listing" ? (parsed.args.name as string) : undefined;
+        type === WalletActivityTypeEnum.Listing ? parsed.args.name : undefined;
       if (!productName) {
         if (!productNames.has(id)) {
           productNames.set(
@@ -316,13 +323,13 @@ export async function getWalletActivity(
 
       const counterparty =
         type === "purchase"
-          ? (parsed.args.seller as string)
+          ? parsed.args.seller
           : type === "sale"
-            ? (parsed.args.buyer as string)
+            ? parsed.args.buyer
             : type === "transfer"
-              ? (parsed.args.previousOwner as string) === normalizedOwner
-                ? (parsed.args.newOwner as string)
-                : (parsed.args.previousOwner as string)
+              ? parsed.args.previousOwner === normalizedOwner
+                ? parsed.args.newOwner
+                : parsed.args.previousOwner
               : "";
       const value =
         type === "transfer"
@@ -512,7 +519,10 @@ export async function buyProduct(productId: string, signer: JsonRpcSigner) {
 
   const transaction = await marketplace.buyProduct(id);
 
-  return waitForSuccessfulTransaction(transaction, "Purchase transaction failed.");
+  return waitForSuccessfulTransaction(
+    transaction,
+    "Purchase transaction failed.",
+  );
 }
 
 export async function listProduct(product: ProductType, signer: JsonRpcSigner) {

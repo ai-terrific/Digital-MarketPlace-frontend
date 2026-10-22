@@ -5,12 +5,13 @@ import React, {
   useCallback,
   useEffect,
   type ReactNode,
+  useMemo,
 } from "react";
 import { BrowserProvider } from "ethers";
 import {
   SEPOLIA_CHAIN_ID,
   SEPOLIA_CHAIN_ID_HEX,
-  VITE_SEPOLIA_RPC_URL,
+  WEB_RPC_URL,
   WALLET_DISCONNECTED_STORAGE_KEY,
 } from "@/constants";
 import type { WalletContextType, WalletState } from "@/types";
@@ -177,12 +178,13 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({
     });
   }, []);
 
+  const value = useMemo(
+    () => ({ ...state, connect, disconnect, connecting, getSigner }),
+    [state, connect, disconnect, connecting, getSigner],
+  );
+
   return (
-    <WalletContext.Provider
-      value={{ ...state, connect, disconnect, connecting, getSigner }}
-    >
-      {children}
-    </WalletContext.Provider>
+    <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
   );
 };
 
@@ -214,7 +216,7 @@ async function ensureSepolia(ethereum: ReturnType<typeof getMetaMaskProvider>) {
             symbol: "ETH",
             decimals: 18,
           },
-          rpcUrls: [VITE_SEPOLIA_RPC_URL],
+          rpcUrls: [WEB_RPC_URL],
         },
       ],
     });

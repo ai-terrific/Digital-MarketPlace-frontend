@@ -59,7 +59,8 @@ export const validateProductImage = (file: File): string | null => {
 export const readImage = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Could not read the selected image."));
+    reader.onerror = () =>
+      reject(new Error("Could not read the selected image."));
     reader.onload = () => {
       if (typeof reader.result !== "string") {
         reject(new Error("Could not read the selected image."));
@@ -79,4 +80,9 @@ export const getSelectedImage = (
   event.currentTarget.value = "";
 
   return file;
+};
+
+export const shortenAddress = (addr: string | null) => {
+  if (addr) return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  return null;
 };

@@ -1,42 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box } from "@mui/material";
-import { useWallet } from "@/context/WalletContext";
 import {
-  activateProduct,
+  Box,
+  Typography,
+  Button,
+  Tabs,
+  Tab,
+  CircularProgress,
+} from "@mui/material";
+import { motion } from "framer-motion";
+import { Package, PlusCircle, Wallet } from "lucide-react";
+import { useWallet } from "../context/WalletContext";
+import {
   getProductActivity,
   getProductsByOwner,
-  transferProduct,
-  updateProductDetails,
 } from "@/services/productService";
 import type { Product, ProductActivity } from "@/types";
-import { errorHandler } from "@/utils";
-import MyProductsBody from "@/components/MyProducts/MyProductsBody";
-import MyProductsDialogs from "@/components/MyProducts/MyProductsDialogs";
-import MyProductsConnectPrompt from "@/components/MyProducts/MyProductsConnectPrompt";
+import { TABS } from "@/constants";
+import MyProductsList from "@/components/MyProducts/MyProductsList";
 
 const MyProductsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { connected, address, connect, connecting, getSigner } = useWallet();
-  const [tab, setTab] = useState(0);
-  const [transferDialog, setTransferDialog] = useState<string | null>(null);
-  const [transferAddress, setTransferAddress] = useState("");
-  const [editProduct, setEditProduct] = useState<Product | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editDescription, setEditDescription] = useState("");
-  const [activationProduct, setActivationProduct] = useState<Product | null>(
-    null,
-  );
-  const [activationPrice, setActivationPrice] = useState("");
+  const { connected, address, connect } = useWallet();
+  const [tab, setTab] = useState<number>(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [soldProducts, setSoldProducts] = useState<ProductActivity[]>([]);
   const [transferredProducts, setTransferredProducts] = useState<
     ProductActivity[]
   >([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [actionError, setActionError] = useState("");
-  const [actionBusy, setActionBusy] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string>("");
   const [reloadIndex, setReloadIndex] = useState(0);
 
   useEffect(() => {
@@ -52,6 +45,7 @@ const MyProductsPage: React.FC = () => {
     let active = true;
     setLoading(true);
     setLoadError("");
+
     Promise.all([getProductsByOwner(address), getProductActivity(address)])
       .then(([ownedProducts, activity]) => {
         if (!active) return;
@@ -60,9 +54,12 @@ const MyProductsPage: React.FC = () => {
         setTransferredProducts(activity.transferred);
       })
       .catch((error) => {
-        if (active) {
-          setLoadError(errorHandler(error, "Could not load your products."));
-        }
+        if (!active) return;
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "Could not load your products.",
+        );
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -73,126 +70,120 @@ const MyProductsPage: React.FC = () => {
     };
   }, [connected, address, reloadIndex]);
 
-  const runAction = async (
-    action: (signer: Awaited<ReturnType<typeof getSigner>>) => Promise<unknown>,
-    fallback: string,
-  ): Promise<boolean> => {
-    setActionBusy(true);
-    setActionError("");
-    try {
-      await action(await getSigner());
-      setReloadIndex((index) => index + 1);
+  const myListings = products.filter((product) => product.status === "Active");
+  const ownedProducts = products.filter(
+    (product) => product.status !== "Active",
+  );
 
-      return true;
-    } catch (error) {
-      setActionError(errorHandler(error, fallback));
-
-      return false;
-    } finally {
-      setActionBusy(false);
-    }
-  };
-
-  const confirmTransfer = async () => {
-    if (!transferDialog) return;
-    const succeeded = await runAction(
-      (signer) => transferProduct(transferDialog, transferAddress, signer),
-      "Product transfer failed.",
-    );
-    if (succeeded) {
-      setTransferDialog(null);
-      setTransferAddress("");
-    }
-  };
-
-  const confirmEdit = async () => {
-    if (!editProduct) return;
-    const succeeded = await runAction(
-      (signer) =>
-        updateProductDetails(editProduct.id, editName, editDescription, signer),
-      "Product update failed.",
-    );
-    if (succeeded) setEditProduct(null);
-  };
-
-  const confirmActivate = async () => {
-    if (!activationProduct) return;
-    const succeeded = await runAction(
-      (signer) =>
-        activateProduct(activationProduct.id, activationPrice, signer),
-      "Product activation failed.",
-    );
-    if (succeeded) setActivationProduct(null);
-  };
+  const list = [myListings, ownedProducts, soldProducts, transferredProducts];
 
   if (!connected) {
     return (
-      <MyProductsConnectPrompt
-        connecting={connecting}
-        onConnect={() => void connect()}
-      />
+      <Box sx={{ textAlign: "center", py: 8 }}>
+        <Box
+          sx={{
+            width: 80,
+            height: 80,
+            borderRadius: 3,
+            bgcolor: "rgba(14, 165, 233, 0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mx: "auto",
+            mb: 3,
+          }}
+        >
+          <Package size={36} color="#0EA5E9" />
+        </Box>
+        <Typography
+          variant="h5"
+          sx={{ fontFamily: "'Space Grotesk', sans-serif", mb: 1 }}
+        >
+          My Products
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          Connect your wallet to manage your listings and owned products.
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={connect}
+          startIcon={<Wallet size={16} />}
+        >
+          Connect Wallet
+        </Button>
+      </Box>
     );
   }
 
-  const myListings = products.filter((product) => product.status === "Active");
-  const ownedProducts = products.filter(({ status }) => status !== "Active");
-
   return (
     <Box>
-      <MyProductsBody
-        tab={tab}
-        onTabChange={setTab}
-        myListings={myListings}
-        ownedProducts={ownedProducts}
-        soldProducts={soldProducts}
-        transferredProducts={transferredProducts}
-        loading={loading}
-        loadError={loadError}
-        actionError={actionError}
-        hasOpenDialog={Boolean(
-          transferDialog || editProduct || activationProduct,
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
+          <Typography
+            variant="h3"
+            sx={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            My Products
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<PlusCircle size={16} />}
+            onClick={() => navigate("/create")}
+          >
+            New Listing
+          </Button>
+        </Box>
+
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
+        >
+          {TABS.map((label, i) => (
+            <Tab
+              key={i}
+              label={label}
+              sx={{ textTransform: "none", fontWeight: 500 }}
+            />
+          ))}
+        </Tabs>
+
+        {tab >= 2 && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: "block", mb: 2 }}
+          >
+            Activity is limited to the latest 10 Sepolia blocks by the RPC
+            provider.
+          </Typography>
         )}
-        actionBusy={actionBusy}
-        onCreate={() => navigate("/create")}
-        onRetry={() => setReloadIndex((index) => index + 1)}
-        onView={(id) => navigate(`/product/${id}`)}
-        onEdit={(product) => {
-          setEditProduct(product);
-          setEditName(product.name);
-          setEditDescription(product.description);
-          setActionError("");
-        }}
-        onTransfer={(product) => {
-          setTransferDialog(product.id);
-          setActionError("");
-        }}
-        onActivate={(product) => {
-          setActivationProduct(product);
-          setActivationPrice(String(product.price));
-          setActionError("");
-        }}
-      />
-      <MyProductsDialogs
-        transferProductId={transferDialog}
-        transferAddress={transferAddress}
-        editProduct={editProduct}
-        editName={editName}
-        editDescription={editDescription}
-        activationProduct={activationProduct}
-        activationPrice={activationPrice}
-        actionBusy={actionBusy}
-        actionError={actionError}
-        onTransferAddressChange={setTransferAddress}
-        onEditNameChange={setEditName}
-        onEditDescriptionChange={setEditDescription}
-        onActivationPriceChange={setActivationPrice}
-        onCloseTransfer={() => setTransferDialog(null)}
-        onCloseEdit={() => setEditProduct(null)}
-        onCloseActivation={() => setActivationProduct(null)}
-        onConfirmTransfer={() => void confirmTransfer()}
-        onConfirmEdit={() => void confirmEdit()}
-        onConfirmActivation={() => void confirmActivate()}
-      />
+
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+            <CircularProgress size={28} />
+          </Box>
+        )}
+        <MyProductsList
+          tab={tab}
+          list={list[tab]}
+          loading={loading}
+          loadError={loadError}
+          onProductChange={() => setReloadIndex((index) => index + 1)}
+        />
+      </motion.div>
     </Box>
   );
 };
