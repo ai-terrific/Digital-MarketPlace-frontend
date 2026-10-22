@@ -47,6 +47,39 @@ export async function uploadProductImage(file: File): Promise<string> {
 
 const readProvider = new JsonRpcProvider(VITE_SEPOLIA_RPC_URL, 11155111);
 const readMarketplace = getMarketplace(readProvider);
+
+function parseProductId(productId: string): bigint {
+  if (!/^\d+$/.test(productId)) {
+    throw new Error("Invalid product ID.");
+  }
+
+  return BigInt(productId);
+}
+
+async function requireSepolia(
+  signer: JsonRpcSigner,
+  action: string,
+): Promise<void> {
+  const network = await signer.provider.getNetwork();
+  if (network.chainId !== 11155111n) {
+    throw new Error(`Switch MetaMask to Sepolia before ${action}.`);
+  }
+}
+
+async function waitForSuccessfulTransaction(
+  transaction: {
+    wait: () => Promise<{ status: number | null; hash: string } | null>;
+  },
+  failureMessage: string,
+): Promise<string> {
+  const receipt = await transaction.wait();
+  if (!receipt || receipt.status !== 1) {
+    throw new Error(failureMessage);
+  }
+
+  return receipt.hash;
+}
+
 function mapContractProduct(item: ContractProduct): Product {
   return {
     id: item.productId.toString(),
@@ -84,6 +117,9 @@ export async function getProducts(
 
 export async function getProductCount(): Promise<number> {
   const count = (await readMarketplace.getProductCount()) as bigint;
+  if (count > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error("Product count exceeds the supported safe integer range.");
+  }
 
   return Number(count);
 }
@@ -313,8 +349,7 @@ export async function getWalletActivity(
 }
 
 export async function getProductDetails(productId: string) {
-  const id = BigInt(productId);
-  if (id < 0n) throw new Error("Invalid product ID.");
+  const id = parseProductId(productId);
 
   const [result, feeBps] = await Promise.all([
     readMarketplace.getProduct(id),
@@ -343,11 +378,10 @@ export async function transferProduct(
   recipient: string,
   signer: JsonRpcSigner,
 ): Promise<string> {
-  const id = BigInt(productId);
-  if (id < 0n) throw new Error("Invalid product ID.");
+  const id = parseProductId(productId);
 
   const normalizedRecipient = getAddress(recipient);
-  await requireSepolia(signer);
+  await requireSepolia(signer, "managing products");
 
   const marketplace = getMarketplace(signer);
   const sender = await signer.getAddress();
@@ -363,12 +397,11 @@ export async function transferProduct(
     id,
     normalizedRecipient,
   );
-  const receipt = await transaction.wait();
-  if (!receipt || receipt.status !== 1) {
-    throw new Error("Product transfer transaction failed.");
-  }
 
-  return receipt.hash;
+  return waitForSuccessfulTransaction(
+    transaction,
+    "Product transfer transaction failed.",
+  );
 }
 
 export async function activateProduct(
@@ -376,8 +409,7 @@ export async function activateProduct(
   price: string,
   signer: JsonRpcSigner,
 ): Promise<string> {
-  const id = BigInt(productId);
-  if (id < 0n) throw new Error("Invalid product ID.");
+  const id = parseProductId(productId);
   if (!price.trim()) throw new Error("Product price is required.");
 
   const listingPrice = parseUnits(price, 18);
@@ -385,7 +417,7 @@ export async function activateProduct(
     throw new Error("Product price must be positive to activate it.");
   }
 
-  await requireSepolia(signer);
+  await requireSepolia(signer, "managing products");
 
   const marketplace = getMarketplace(signer);
   const sender = await signer.getAddress();
@@ -398,12 +430,11 @@ export async function activateProduct(
   }
 
   const transaction = await marketplace.listProduct(id, listingPrice);
-  const receipt = await transaction.wait();
-  if (!receipt || receipt.status !== 1) {
-    throw new Error("Product activation transaction failed.");
-  }
 
-  return receipt.hash;
+  return waitForSuccessfulTransaction(
+    transaction,
+    "Product activation transaction failed.",
+  );
 }
 
 export async function updateProductDetails(
@@ -412,11 +443,10 @@ export async function updateProductDetails(
   description: string,
   signer: JsonRpcSigner,
 ): Promise<string> {
-  const id = BigInt(productId);
-  if (id < 0n) throw new Error("Invalid product ID.");
+  const id = parseProductId(productId);
   if (!name.trim()) throw new Error("Product name is required.");
 
-  await requireSepolia(signer);
+  await requireSepolia(signer, "managing products");
 
   const marketplace = getMarketplace(signer);
   const sender = await signer.getAddress();
@@ -431,22 +461,16 @@ export async function updateProductDetails(
     description.trim(),
     product.imageURI,
   );
-  const receipt = await transaction.wait();
-  if (!receipt || receipt.status !== 1) {
-    throw new Error("Product update transaction failed.");
-  }
 
-  return receipt.hash;
+  return waitForSuccessfulTransaction(
+    transaction,
+    "Product update transaction failed.",
+  );
 }
 
 export async function buyProduct(productId: string, signer: JsonRpcSigner) {
-  const id = BigInt(productId);
-  if (id < 0n) throw new Error("Invalid product ID.");
-
-  const network = await signer.provider.getNetwork();
-  if (network.chainId !== 11155111n) {
-    throw new Error("Switch MetaMask to Sepolia before buying a product.");
-  }
+  const id = parseProductId(productId);
+  await requireSepolia(signer, "buying a product");
 
   const marketplace = getMarketplace(signer);
   const buyer = await signer.getAddress();
@@ -480,26 +504,15 @@ export async function buyProduct(productId: string, signer: JsonRpcSigner) {
 
   if (allowance < total) {
     const approval = await token.approve(MARKETPLACE_ADDRESS, total);
-    const approvalReceipt = await approval.wait();
-    if (!approvalReceipt || approvalReceipt.status !== 1) {
-      throw new Error("PHX approval transaction failed.");
-    }
+    await waitForSuccessfulTransaction(
+      approval,
+      "PHX approval transaction failed.",
+    );
   }
 
   const transaction = await marketplace.buyProduct(id);
-  const receipt = await transaction.wait();
-  if (!receipt || receipt.status !== 1) {
-    throw new Error("Purchase transaction failed.");
-  }
 
-  return receipt.hash;
-}
-
-async function requireSepolia(signer: JsonRpcSigner) {
-  const network = await signer.provider.getNetwork();
-  if (network.chainId !== 11155111n) {
-    throw new Error("Switch MetaMask to Sepolia before managing products.");
-  }
+  return waitForSuccessfulTransaction(transaction, "Purchase transaction failed.");
 }
 
 export async function listProduct(product: ProductType, signer: JsonRpcSigner) {
@@ -513,10 +526,7 @@ export async function listProduct(product: ProductType, signer: JsonRpcSigner) {
 
   // PHX has 18 decimals.
   const price = parseUnits(product.pricePHX, 18);
-  const network = await signer.provider.getNetwork();
-  if (network.chainId !== 11155111n) {
-    throw new Error("Switch MetaMask to Sepolia before creating a product.");
-  }
+  await requireSepolia(signer, "creating a product");
 
   const contractCode = await signer.provider.getCode(MARKETPLACE_ADDRESS);
   if (contractCode === "0x") {
@@ -545,10 +555,10 @@ export async function listProduct(product: ProductType, signer: JsonRpcSigner) {
 
     if (allowance < creationFee) {
       const approval = await token.approve(MARKETPLACE_ADDRESS, creationFee);
-      const approvalReceipt = await approval.wait();
-      if (!approvalReceipt || approvalReceipt.status !== 1) {
-        throw new Error("PHX approval transaction failed.");
-      }
+      await waitForSuccessfulTransaction(
+        approval,
+        "PHX approval transaction failed.",
+      );
     }
   }
 
@@ -559,11 +569,9 @@ export async function listProduct(product: ProductType, signer: JsonRpcSigner) {
     price,
     product.imageURI,
   );
-  const receipt = await transaction.wait();
 
-  if (!receipt || receipt.status !== 1) {
-    throw new Error("Product creation transaction failed.");
-  }
-
-  return receipt.hash;
+  return waitForSuccessfulTransaction(
+    transaction,
+    "Product creation transaction failed.",
+  );
 }

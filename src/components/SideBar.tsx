@@ -12,8 +12,8 @@ import {
   useMediaQuery,
   useTheme,
   Avatar,
-  Divider,
   Alert,
+  Divider,
 } from "@mui/material";
 import { Wallet, LogOut, ChevronRight, X } from "lucide-react";
 import { getAddress } from "ethers";
@@ -21,6 +21,7 @@ import { NAVIGATION_ITEMS, routers, SEPOLIA_CHAIN_ID } from "@/constants";
 import { getMarketplaceOwner } from "@/services/marketplaceAdminService";
 import { useThemeMode } from "../ThemeContext";
 import { useWallet } from "../context/WalletContext";
+import { errorHandler } from "@/utils";
 
 const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const { mode } = useThemeMode();
@@ -60,9 +61,7 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
       .catch((error: unknown) => {
         if (!active) return;
         setAdminCheckError(
-          error instanceof Error
-            ? error.message
-            : "Could not verify marketplace administrator.",
+          errorHandler(error, "Could not verify marketplace administrator."),
         );
       });
 

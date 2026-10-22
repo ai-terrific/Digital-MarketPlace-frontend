@@ -1,7 +1,8 @@
-import axios, { AxiosError, AxiosInstance } from "axios";
+import axios, { AxiosInstance } from "axios";
 
 import { BASE_URL } from "@/constants";
 import type { ApiRequest } from "@/types";
+import { errorHandler } from "@/utils";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: `${BASE_URL}/api/`,
@@ -19,13 +20,9 @@ const apiRequest = async <T>(config: ApiRequest): Promise<T> => {
 
     return response.data;
   } catch (error) {
-    const message =
-      error instanceof AxiosError
-        ? error.response?.data?.message
-        : error instanceof Error
-          ? error.message
-          : "An unknown error occurred";
-    throw new Error(message || config.errorMessage);
+    throw Object.assign(new Error(errorHandler(error, config.errorMessage)), {
+      cause: error,
+    });
   }
 };
 

@@ -53,6 +53,7 @@ export const createAppTheme = (mode: "light" | "dark"): Theme => {
       },
       h5: { fontFamily: FONT_FAMILIES.heading, fontWeight: 600 },
       h6: { fontFamily: FONT_FAMILIES.heading, fontWeight: 600 },
+      subtitle2: { fontFamily: FONT_FAMILIES.heading, fontWeight: 600 },
       button: {
         fontFamily: FONT_FAMILIES.body,
         fontWeight: 600,

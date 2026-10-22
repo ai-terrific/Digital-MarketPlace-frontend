@@ -2,6 +2,8 @@ import type { AxiosRequestConfig } from "axios";
 import type { JsonRpcSigner } from "ethers";
 import type { LucideIcon } from "lucide-react";
 
+export type ProductStatus = "Active" | "Sold" | "Transferred" | "Inactive";
+
 export interface Product {
   id: string;
   name: string;
@@ -10,7 +12,7 @@ export interface Product {
   currency: "PHX" | "ETH";
   seller: string;
   image: string;
-  status: "Active" | "Sold" | "Transferred" | "Inactive";
+  status: ProductStatus;
   specifications?: Record<string, string>;
   createdAt?: string;
   owner?: string;
@@ -132,15 +134,26 @@ export interface NavigationItem {
   icon: LucideIcon;
 }
 
-export type sortType = "newest" | "price-asc" | "price-desc";
+export enum sortType {
+  Newest = "newest",
+  PriceAsc = "price-asc",
+  PriceDesc = "price-desc",
+}
 
-export type submitStatusType = "idle" | "pending" | "success" | "error";
+export type sortTypeUnion = `${sortType}`;
 
-export type txStatusType = "idle" | "pending" | "success" | "failed";
+export type statusType = "idle" | "pending" | "success" | "error";
 
 export type currencyType = "PHX" | "ETH";
 
 export interface balanceType {
   phx: number;
   eth: number;
+}
+
+export interface formData {
+  name: string;
+  description: string;
+  price: string;
+  currency: currencyType;
 }

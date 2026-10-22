@@ -15,6 +15,7 @@ import {
 } from "@/constants";
 import type { WalletContextType, WalletState } from "@/types";
 import { getMetaMaskProvider } from "@/utils/metamask";
+import { errorHandler } from "@/utils";
 
 function isWalletDisconnected() {
   try {
@@ -148,8 +149,11 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({
         network: "Ethereum Sepolia",
         chainId: Number(network.chainId),
       });
-    } catch {
-      console.error("Wallet connection failed");
+    } catch (error) {
+      console.error(
+        "Wallet connection failed:",
+        errorHandler(error, "Unknown wallet connection error."),
+      );
     } finally {
       setConnecting(false);
     }
@@ -193,7 +197,10 @@ async function ensureSepolia(ethereum: ReturnType<typeof getMetaMaskProvider>) {
     });
   } catch (error) {
     if ((error as { code?: number }).code !== 4902) {
-      throw new Error("Please approve switching MetaMask to Sepolia.");
+      throw Object.assign(
+        new Error("Please approve switching MetaMask to Sepolia."),
+        { cause: error },
+      );
     }
 
     await ethereum.request({
