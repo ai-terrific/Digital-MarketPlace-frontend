@@ -5,8 +5,6 @@ import {
   IconButton,
   List,
   Button,
-  useMediaQuery,
-  useTheme,
   Avatar,
   Alert,
   Divider,
@@ -20,6 +18,7 @@ import { useWallet } from "../../context/WalletContext";
 import { errorHandler, shortenAddress } from "@/utils";
 import Logo from "../core/Logo";
 import SidebarListItem from "./ListItem";
+import { useDeviceType } from "@/hooks";
 
 const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const { mode } = useThemeMode();
@@ -34,8 +33,7 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   } = useWallet();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminCheckError, setAdminCheckError] = useState<string>("");
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { isMobile } = useDeviceType();
 
   useEffect(() => {
     let active = true;

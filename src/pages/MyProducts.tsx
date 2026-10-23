@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { Package, PlusCircle, Wallet } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { useWallet } from "../context/WalletContext";
 import {
   getProductActivity,
@@ -19,10 +19,12 @@ import type { Product, ProductActivity } from "@/types";
 import { TABS } from "@/constants";
 import MyProductsList from "@/components/MyProducts/MyProductsList";
 import PageHeader from "@/components/core/PageHeader";
+import ConnectWallet from "@/components/MyProducts/ConnectWallet";
+import { Loading } from "@/components/core/Common";
 
 const MyProductsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { connected, address, connect } = useWallet();
+  const { connected, address } = useWallet();
   const [tab, setTab] = useState<number>(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [soldProducts, setSoldProducts] = useState<ProductActivity[]>([]);
@@ -78,40 +80,7 @@ const MyProductsPage: React.FC = () => {
 
   const list = [myListings, ownedProducts, soldProducts, transferredProducts];
 
-  if (!connected) {
-    return (
-      <Box sx={{ textAlign: "center", py: 8 }}>
-        <Box
-          sx={{
-            width: 80,
-            height: 80,
-            borderRadius: 3,
-            bgcolor: "rgba(14, 165, 233, 0.1)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mx: "auto",
-            mb: 3,
-          }}
-        >
-          <Package size={36} color="#0EA5E9" />
-        </Box>
-
-        <PageHeader
-          title="My Products"
-          description="Connect your wallet to manage your listings and owned products."
-        />
-
-        <Button
-          variant="contained"
-          onClick={connect}
-          startIcon={<Wallet size={16} />}
-        >
-          Connect Wallet
-        </Button>
-      </Box>
-    );
-  }
+  if (!connected) return <ConnectWallet />;
 
   return (
     <Box>
@@ -164,11 +133,7 @@ const MyProductsPage: React.FC = () => {
           </Typography>
         )}
 
-        {loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-            <CircularProgress size={28} />
-          </Box>
-        )}
+        {loading && <Loading />}
         <MyProductsList
           tab={tab}
           list={list[tab]}

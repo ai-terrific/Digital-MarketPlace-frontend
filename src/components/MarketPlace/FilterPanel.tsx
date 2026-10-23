@@ -11,10 +11,9 @@ import {
   Select,
   Switch,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import { X } from "lucide-react";
+import { useDeviceType } from "@/hooks";
 
 interface FilterPanelType {
   sort: SortType;
@@ -35,8 +34,7 @@ const FilterPanel: FC<FilterPanelType> = ({
   setPage,
   resetFilters,
 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { isMobile } = useDeviceType();
 
   return (
     <Box sx={{ p: 2 }}>

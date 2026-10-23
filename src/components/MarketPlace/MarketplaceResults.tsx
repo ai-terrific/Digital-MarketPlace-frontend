@@ -8,7 +8,7 @@ import {
 import { motion } from "framer-motion";
 import type { Product } from "@/types";
 import ProductItem from "@/components/MarketPlace/ProductItem";
-import NoProducts from "./NoProducts";
+import NoProducts from "../core/NoProducts";
 
 interface MarketplaceResultsProps {
   loading: boolean;

@@ -1,5 +1,6 @@
-import { Drawer, useMediaQuery, useTheme } from "@mui/material";
+import { Drawer } from "@mui/material";
 import SidebarContent from "@/components/SideBar";
+import { useDeviceType } from "@/hooks";
 
 interface SideBarProps {
   open: boolean;
@@ -7,8 +8,7 @@ interface SideBarProps {
 }
 
 export const SideBar = ({ open, onToggle }: SideBarProps) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { isMobile } = useDeviceType();
 
   return (
     <Drawer

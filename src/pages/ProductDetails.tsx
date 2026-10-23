@@ -11,6 +11,7 @@ import ProductOverview from "@/components/ProductDetails/ProductOverview";
 import PurchaseDialog from "@/components/ProductDetails/PurchaseDialog";
 import LoadingError from "@/components/ProductDetails/LoadingError";
 import { Loading } from "@/components/core/Common";
+import NoProducts from "@/components/core/NoProducts";
 
 const ProductDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -73,14 +74,7 @@ const ProductDetailsPage: React.FC = () => {
   }
 
   if (!product) {
-    return (
-      <Box sx={{ textAlign: "center", py: 8 }}>
-        <Typography variant="h5">Product not found</Typography>
-        <Button onClick={() => navigate("/")} sx={{ mt: 2 }}>
-          Back to Marketplace
-        </Button>
-      </Box>
-    );
+    return <NoProducts />;
   }
 
   return (

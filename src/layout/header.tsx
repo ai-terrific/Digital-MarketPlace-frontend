@@ -6,8 +6,6 @@ import {
   IconButton,
   Button,
   Chip,
-  useMediaQuery,
-  useTheme,
   Avatar,
   Tooltip,
 } from "@mui/material";
@@ -15,6 +13,7 @@ import { Menu as MenuIcon, Sun, Moon, Wallet } from "lucide-react";
 import { useThemeMode } from "@/context/ThemeContext";
 import { useWallet } from "@/context/WalletContext";
 import { shortenAddress } from "@/utils";
+import { useDeviceType } from "@/hooks";
 
 interface HeaderProps {
   onToggle: () => void;
@@ -24,8 +23,7 @@ export const Header = ({ onToggle }: HeaderProps) => {
   const { mode, toggleTheme } = useThemeMode();
   const { connected, address, network, connect, connecting } = useWallet();
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { isMobile } = useDeviceType();
 
   return (
     <AppBar

@@ -11,12 +11,11 @@ import {
   Select,
   Switch,
   TextField,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { SortType } from "@/types";
 import FilterPanel from "./FilterPanel";
+import { useDeviceType } from "@/hooks";
 
 interface MarketplaceFiltersProps {
   search: string;
@@ -43,8 +42,7 @@ const MarketplaceFilters: React.FC<MarketplaceFiltersProps> = ({
   setPage,
   resetFilters,
 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { isMobile } = useDeviceType();
 
   return (
     <>

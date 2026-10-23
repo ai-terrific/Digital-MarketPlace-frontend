@@ -1,4 +1,5 @@
-import type { CurrencyType, StatusType } from "./system";
+import { CurrencyType } from "./marketplace";
+import { StatusType } from "./system";
 
 export enum TransactionType {
   Purchase = "purchase",
