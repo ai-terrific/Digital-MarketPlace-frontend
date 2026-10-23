@@ -12,7 +12,7 @@ export const SideBar = ({ open, onToggle }: SideBarProps) => {
 
   return (
     <Drawer
-      variant={isMobile ? "persistent" : "permanent"}
+      variant={isMobile ? "temporary" : "permanent"}
       anchor="left"
       open={open}
       onClose={() => onToggle()}

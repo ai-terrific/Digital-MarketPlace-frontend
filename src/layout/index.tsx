@@ -4,8 +4,10 @@ import { Box } from "@mui/material";
 import { SideBar } from "./sidebar";
 import { Header } from "./header";
 import { Footer } from "./footer";
+import { useDeviceType } from "@/hooks";
 
 const Layout: React.FC = () => {
+  const { isMobile } = useDeviceType();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const onToggle = () => {
     setSidebarOpen((e) => !e);
@@ -30,9 +32,10 @@ const Layout: React.FC = () => {
           sx={{
             flex: 1,
             p: { xs: 2, sm: 3, md: 4 },
-            maxWidth: 1400,
+            maxWidth: 1440,
             width: "100%",
             mx: "auto",
+            paddingLeft: isMobile ? `32px !important` : `312px !important`,
           }}
         >
           <Outlet />

@@ -79,65 +79,64 @@ const ProductImageField: React.FC<ProductImageFieldProps> = ({
           )}
         </Box>
       ) : (
-        <Box
-          sx={{
-            border: 2,
-            borderColor: error ? "error.main" : "divider",
-            borderStyle: "dashed",
-            borderRadius: 2,
-            p: 4,
-            textAlign: "center",
-            cursor: "pointer",
-            background:
-              mode === "dark"
-                ? "linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, rgba(2, 132, 199, 0.02) 100%)"
-                : "linear-gradient(135deg, rgba(14, 165, 233, 0.02) 0%, rgba(2, 132, 199, 0.01) 100%)",
-            "&:hover": {
-              borderColor: "primary.main",
-              bgcolor:
-                mode === "dark"
-                  ? "rgba(14, 165, 233, 0.05)"
-                  : "rgba(14, 165, 233, 0.03)",
-            },
-          }}
-        >
-          <Box>
+        <Box>
+          <input
+            type="file"
+            accept={PRODUCT_IMAGE_ACCEPT}
+            onChange={onChange}
+            style={{ display: "none" }}
+            id="upload-image"
+          />
+          <label htmlFor="upload-image">
             <Box
               sx={{
-                width: 56,
-                height: 56,
+                border: 2,
+                borderColor: error ? "error.main" : "divider",
+                borderStyle: "dashed",
                 borderRadius: 2,
-                bgcolor: "rgba(14, 165, 233, 0.1)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                mx: "auto",
-                mb: 1.5,
+                p: 4,
+                textAlign: "center",
+                cursor: "pointer",
+                background:
+                  mode === "dark"
+                    ? "linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, rgba(2, 132, 199, 0.02) 100%)"
+                    : "linear-gradient(135deg, rgba(14, 165, 233, 0.02) 0%, rgba(2, 132, 199, 0.01) 100%)",
+                "&:hover": {
+                  borderColor: "primary.main",
+                  bgcolor:
+                    mode === "dark"
+                      ? "rgba(14, 165, 233, 0.05)"
+                      : "rgba(14, 165, 233, 0.03)",
+                },
               }}
             >
-              <Upload size={24} color="#0EA5E9" />
+              <Box
+                sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 2,
+                  bgcolor: "rgba(14, 165, 233, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mx: "auto",
+                  mb: 1.5,
+                }}
+              >
+                <Upload size={24} color="#0EA5E9" />
+              </Box>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 0.5 }}
+              >
+                Choose an image to upload
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                PNG, JPEG, or WebP (max 5MB)
+              </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-              Choose an image to upload
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              PNG, JPEG, or WebP (max 5MB)
-            </Typography>
-            <Button
-              component="label"
-              variant="outlined"
-              startIcon={<Upload size={16} />}
-              sx={{ mt: 1.5 }}
-            >
-              Browse files
-              <input
-                type="file"
-                accept={PRODUCT_IMAGE_ACCEPT}
-                onChange={onChange}
-                style={{ display: "none" }}
-              />
-            </Button>
-          </Box>
+          </label>
         </Box>
       )}
       {error && (
