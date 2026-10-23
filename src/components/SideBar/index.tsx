@@ -18,7 +18,7 @@ import { getMarketplaceOwner } from "@/services/marketplaceAdminService";
 import { useThemeMode } from "../../context/ThemeContext";
 import { useWallet } from "../../context/WalletContext";
 import { errorHandler, shortenAddress } from "@/utils";
-import Logo from "../Core/Logo";
+import Logo from "../core/Logo";
 import SidebarListItem from "./ListItem";
 
 const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {

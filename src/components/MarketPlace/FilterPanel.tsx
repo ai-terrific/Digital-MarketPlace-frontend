@@ -68,9 +68,9 @@ const FilterPanel: FC<FilterPanelType> = ({
           label="Sort By"
           onChange={(e) => setSort(e.target.value)}
         >
-          <MenuItem value="newest">Newest First</MenuItem>
-          <MenuItem value="price-asc">Price: Low to High</MenuItem>
-          <MenuItem value="price-desc">Price: High to Low</MenuItem>
+          <MenuItem value={SortType.Newest}>Newest First</MenuItem>
+          <MenuItem value={SortType.PriceAsc}>Price: Low to High</MenuItem>
+          <MenuItem value={SortType.PriceDesc}>Price: High to Low</MenuItem>
         </Select>
       </FormControl>
 

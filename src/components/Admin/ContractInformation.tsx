@@ -23,7 +23,6 @@ const ContractInformation: React.FC<ContractInformationType> = ({
       <Typography
         variant="subtitle1"
         sx={{
-          fontSize: "0.75rem",
           wordBreak: "break-all",
         }}
       >

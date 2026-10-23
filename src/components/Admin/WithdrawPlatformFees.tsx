@@ -19,13 +19,13 @@ import { StatusType } from "@/types";
 interface WithdrawPlatformFeesProps {
   balance: number;
   ownerAddress: string;
-  setReloadIndex: React.Dispatch<React.SetStateAction<number>>;
+  refresh: () => void;
 }
 
 const WithdrawPlatformFees: React.FC<WithdrawPlatformFeesProps> = ({
   balance,
   ownerAddress,
-  setReloadIndex,
+  refresh,
 }) => {
   const { getSigner } = useWallet();
   const [withdrawing, setWithdrawing] = useState(false);
@@ -46,7 +46,7 @@ const WithdrawPlatformFees: React.FC<WithdrawPlatformFeesProps> = ({
       const hash = await withdrawMarketplaceFees(signer);
       setWithdrawTransactionHash(hash);
       setWithdrawStatus(StatusType.Success);
-      setReloadIndex((index) => index + 1);
+      refresh();
     } catch (error) {
       setWithdrawError(
         error instanceof Error
@@ -106,11 +106,11 @@ const WithdrawPlatformFees: React.FC<WithdrawPlatformFeesProps> = ({
       >
         {withdrawing
           ? "Withdrawing..."
-          : withdrawStatus === "success"
+          : withdrawStatus === StatusType.Success
             ? "Withdrawn!"
             : "Withdraw All"}
       </Button>
-      {withdrawStatus === "pending" && (
+      {withdrawStatus === StatusType.Pending && (
         <Box sx={{ mt: 2 }}>
           <LinearProgress />
           <Typography
@@ -122,7 +122,7 @@ const WithdrawPlatformFees: React.FC<WithdrawPlatformFeesProps> = ({
           </Typography>
         </Box>
       )}
-      {withdrawStatus === "success" && (
+      {withdrawStatus === StatusType.Success && (
         <Alert severity="success" sx={{ mt: 2 }}>
           Platform fees withdrawn successfully. Transaction:{" "}
           {withdrawTransactionHash}

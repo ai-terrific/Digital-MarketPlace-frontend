@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import StatusChip from "../Core/StatusChip";
+import StatusChip from "../core/StatusChip";
 import MyProductsAction from "./MyProductsAction";
 import OwnedProductsAction from "./OwnedProductsAction";
 
@@ -52,6 +52,7 @@ const ProductItem: React.FC<ProductItemProps> = ({
           <Box
             sx={{
               display: "flex",
+              position: "relative",
               justifyContent: "space-between",
               alignItems: "flex-start",
               mb: 1,

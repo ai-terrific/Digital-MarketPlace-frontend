@@ -13,9 +13,9 @@ import {
   Typography,
 } from "@mui/material";
 import { AlertCircle, Sparkles } from "lucide-react";
-import type { CreateProductFormData, StatusType } from "@/types";
+import { CreateProductFormData, CurrencyType, StatusType } from "@/types";
 import ProductImageField from "./ProductImageField";
-import TxPending from "./TxPending";
+import TxPending from "../core/TxPending";
 
 interface CreateProductFormProps {
   form: CreateProductFormData;
@@ -104,8 +104,8 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
                 })
               }
             >
-              <MenuItem value="PHX">PHX</MenuItem>
-              <MenuItem value="ETH" disabled>
+              <MenuItem value={CurrencyType.PHX}>PHX</MenuItem>
+              <MenuItem value={CurrencyType.ETH} disabled>
                 ETH
               </MenuItem>
             </Select>
@@ -136,19 +136,21 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
         <Button
           variant="contained"
           type="submit"
-          disabled={submitting || uploadingImage || submitStatus === "success"}
+          disabled={
+            submitting || uploadingImage || submitStatus === StatusType.Success
+          }
           startIcon={<Sparkles size={16} />}
         >
           {!connected
             ? "Connect Wallet to Publish"
             : submitting
               ? "Publishing..."
-              : submitStatus === "success"
+              : submitStatus === StatusType.Success
                 ? "Published!"
                 : "Publish Listing"}
         </Button>
       </Box>
-      {submitStatus === "success" && (
+      {submitStatus === StatusType.Success && (
         <Alert severity="success" sx={{ mt: 2 }}>
           Transaction confirmed. The product listing was recorded on the
           marketplace contract.
@@ -162,12 +164,12 @@ const CreateProductForm: React.FC<CreateProductFormProps> = ({
           )}
         </Alert>
       )}
-      {submitStatus === "error" && (
+      {submitStatus === StatusType.Error && (
         <Alert severity="error" sx={{ mt: 2 }}>
           {submitError}
         </Alert>
       )}
-      {submitStatus === "pending" && <TxPending />}
+      {submitStatus === StatusType.Pending && <TxPending />}
     </CardContent>
   </Card>
 );

@@ -2,7 +2,7 @@ import { useThemeMode } from "@/context/ThemeContext";
 import { Product } from "@/types";
 import { Box, CardContent, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import StatusChip from "../Core/StatusChip";
+import StatusChip from "../core/StatusChip";
 import { ProductCard, ProductDescription, ProductName } from "./styled";
 
 const ProductItem = ({ product }: { product: Product }) => {

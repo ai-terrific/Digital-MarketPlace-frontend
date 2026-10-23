@@ -4,10 +4,11 @@ import { Box } from "@mui/material";
 import { MARKETPLACE_PAGE_SIZE } from "@/constants";
 import { Product, SortType } from "@/types";
 import { getProductCount, getProducts } from "@/services/productService";
-import { PageTitle, Pagination } from "@/components/Core/Common";
 import Filters from "@/components/MarketPlace/MarketplaceFilters";
 import Results from "@/components/MarketPlace/MarketplaceResults";
 import { errorHandler } from "@/utils";
+import PageHeader from "@/components/core/PageHeader";
+import Pagination from "@/components/core/Pagination";
 
 const MarketplacePage: React.FC = () => {
   const [search, setSearch] = useState("");
@@ -19,7 +20,7 @@ const MarketplacePage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [reloadIndex, setReloadIndex] = useState(0);
+  const [index, setReloadIndex] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -48,7 +49,7 @@ const MarketplacePage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [page, reloadIndex]);
+  }, [page, index]);
 
   const filteredProducts = useMemo(() => {
     let filtered = products.filter(
@@ -96,7 +97,7 @@ const MarketplacePage: React.FC = () => {
 
   return (
     <Box>
-      <PageTitle title="Marketplace" />
+      <PageHeader title="Marketplace" />
       <Filters
         search={search}
         setSearch={setSearch}

@@ -108,14 +108,14 @@ const PurchaseDialog: React.FC<PurchaseDialogProps> = ({
             </Typography>
           </Box>
         </Box>
-        {status === "pending" && (
+        {status === StatusType.Pending && (
           <Box sx={{ textAlign: "center", py: 2 }}>
             <Typography variant="body2" color="primary.main">
               Transaction pending... Please confirm in your wallet.
             </Typography>
           </Box>
         )}
-        {status === "success" && (
+        {status === StatusType.Success && (
           <Alert severity="success" sx={{ mt: 2 }}>
             Purchase confirmed.{" "}
             <Button
@@ -130,7 +130,7 @@ const PurchaseDialog: React.FC<PurchaseDialogProps> = ({
             </Button>
           </Alert>
         )}
-        {status === "error" && (
+        {status === StatusType.Error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
           </Alert>
@@ -142,17 +142,19 @@ const PurchaseDialog: React.FC<PurchaseDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={closeDialog} disabled={status === "pending"}>
+        <Button onClick={closeDialog} disabled={status === StatusType.Pending}>
           Cancel
         </Button>
         <Button
           variant="contained"
           onClick={() => void handlePurchase()}
-          disabled={status === "pending" || status === "success"}
+          disabled={
+            status === StatusType.Pending || status === StatusType.Success
+          }
         >
           {!connected
             ? "Connect Wallet"
-            : status === "pending"
+            : status === StatusType.Pending
               ? "Pending..."
               : "Confirm Purchase"}
         </Button>

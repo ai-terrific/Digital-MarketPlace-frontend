@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Pagination as MuiPagination } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 import type { TypographyProps } from "@mui/material";
 
 export const PageTitle: React.FC<{ title: string }> = ({ title }) => {
@@ -12,7 +12,7 @@ export const PageTitle: React.FC<{ title: string }> = ({ title }) => {
 
 export const PageDescription: React.FC<
   Omit<TypographyProps, "children"> & {
-    description: string;
+    description?: string;
   }
 > = ({ description, ...props }) => {
   return (
@@ -27,34 +27,10 @@ export const PageDescription: React.FC<
   );
 };
 
-interface PaginationType {
-  count: number;
-  page: number;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
-}
-
-export const Pagination: React.FC<PaginationType> = ({
-  count,
-  page,
-  setPage,
-}) => {
+export const Loading: React.FC = () => {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        mt: 4,
-      }}
-    >
-      <MuiPagination
-        count={count}
-        page={page + 1}
-        onChange={(_, value) => setPage(value - 1)}
-        color="primary"
-        showFirstButton
-        showLastButton
-        aria-label="Marketplace product pages"
-      />
+    <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+      <CircularProgress />
     </Box>
   );
 };

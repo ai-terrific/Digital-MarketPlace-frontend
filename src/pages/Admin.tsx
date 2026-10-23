@@ -1,35 +1,26 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  Alert,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { motion } from "framer-motion";
-import {
-  Settings,
-  Shield,
-  DollarSign,
-  Wallet,
-  AlertTriangle,
-  TrendingUp,
-} from "lucide-react";
+import { Settings, Shield, DollarSign, Wallet, TrendingUp } from "lucide-react";
 import { useWallet } from "../context/WalletContext";
+import { useRefresh } from "../hooks/useRefresh";
 import { getMarketplaceAdminData } from "@/services/marketplaceAdminService";
 import type { MarketplaceAdminData } from "@/types";
-import { PageDescription, PageTitle } from "@/components/Core/Common";
+import { Loading, PageDescription, PageTitle } from "@/components/core/Common";
 import ContractInformation from "@/components/Admin/ContractInformation";
 import UpdateListingFee from "@/components/Admin/UpdateListingFee";
 import UpdateBuyerPlatformFee from "@/components/Admin/UpdateBuyerPlatformFee";
 import WithdrawPlatformFees from "@/components/Admin/WithdrawPlatformFees";
+import UnAuthorized from "@/components/Admin/UnAuthorized";
+import LoadingError from "@/components/Admin/LoadingError";
+import PageHeader from "@/components/core/PageHeader";
 
 const AdminPage: React.FC = () => {
   const { connected, address, connect, connecting, network } = useWallet();
   const [adminData, setAdminData] = useState<MarketplaceAdminData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string>("");
-  const [reloadIndex, setReloadIndex] = useState<number>(0);
+  const { index, refresh } = useRefresh();
   useEffect(() => {
     if (!connected || !address) {
       setAdminData(null);
@@ -62,7 +53,7 @@ const AdminPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [connected, address, reloadIndex]);
+  }, [connected, address, index]);
 
   const ownerAddress = adminData?.owner ?? "";
   const isOwner =
@@ -113,15 +104,12 @@ const AdminPage: React.FC = () => {
         >
           <Settings size={36} color="#0EA5E9" />
         </Box>
-        <Typography
-          variant="h5"
-          sx={{ fontFamily: "'Space Grotesk', sans-serif", mb: 1 }}
-        >
-          Admin Settings
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Connect your wallet to access admin controls.
-        </Typography>
+
+        <PageHeader
+          title="Admin Settings"
+          description="Connect your wallet to access admin controls."
+        />
+
         <Button
           variant="contained"
           onClick={connect}
@@ -135,80 +123,19 @@ const AdminPage: React.FC = () => {
   }
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
-        <CircularProgress size={30} />
-      </Box>
-    );
+    return <Loading />;
   }
 
   if (loadError || !adminData) {
     return (
-      <Alert
-        severity="error"
-        action={
-          <Button
-            color="inherit"
-            size="small"
-            onClick={() => setReloadIndex((index) => index + 1)}
-          >
-            Retry
-          </Button>
-        }
-      >
+      <LoadingError>
         {loadError || "Marketplace admin data is unavailable."}
-      </Alert>
+      </LoadingError>
     );
   }
 
   if (!isOwner) {
-    return (
-      <Box sx={{ textAlign: "center", py: 8 }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Box
-            sx={{
-              width: 80,
-              height: 80,
-              borderRadius: 3,
-              bgcolor: "rgba(239, 68, 68, 0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              mx: "auto",
-              mb: 3,
-            }}
-          >
-            <AlertTriangle size={36} color="#EF4444" />
-          </Box>
-          <Typography
-            variant="h5"
-            sx={{ fontFamily: "'Space Grotesk', sans-serif", mb: 1 }}
-          >
-            Unauthorized
-          </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ maxWidth: 400, mx: "auto" }}
-          >
-            Your connected wallet is not the marketplace owner. Admin controls
-            are enforced by the smart contract — only the contract owner can
-            access these settings.
-          </Typography>
-          <Alert
-            severity="warning"
-            sx={{ mt: 3, maxWidth: 500, mx: "auto", textAlign: "left" }}
-          >
-            Connected: {address?.slice(0, 10)}...{address?.slice(-8)}
-            <br />
-            Owner: {ownerAddress}
-          </Alert>
-        </motion.div>
-      </Box>
-    );
+    return <UnAuthorized ownerAddress={ownerAddress} />;
   }
 
   return (
@@ -240,10 +167,7 @@ const AdminPage: React.FC = () => {
           ))}
         </Box>
 
-        <UpdateListingFee
-          adminData={adminData}
-          setReloadIndex={setReloadIndex}
-        />
+        <UpdateListingFee adminData={adminData} refresh={refresh} />
 
         <Box
           sx={{
@@ -257,12 +181,12 @@ const AdminPage: React.FC = () => {
           <UpdateBuyerPlatformFee
             currentFee={currentFee}
             maxFee={maxFee}
-            setReloadIndex={setReloadIndex}
+            refresh={refresh}
           />
           <WithdrawPlatformFees
             balance={withdrawableBalance}
             ownerAddress={ownerAddress}
-            setReloadIndex={setReloadIndex}
+            refresh={refresh}
           />
         </Box>
       </motion.div>

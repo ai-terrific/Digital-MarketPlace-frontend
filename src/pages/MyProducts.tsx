@@ -18,6 +18,7 @@ import {
 import type { Product, ProductActivity } from "@/types";
 import { TABS } from "@/constants";
 import MyProductsList from "@/components/MyProducts/MyProductsList";
+import PageHeader from "@/components/core/PageHeader";
 
 const MyProductsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const MyProductsPage: React.FC = () => {
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string>("");
-  const [reloadIndex, setReloadIndex] = useState(0);
+  const [index, setReloadIndex] = useState(0);
 
   useEffect(() => {
     if (!connected || !address) {
@@ -68,7 +69,7 @@ const MyProductsPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [connected, address, reloadIndex]);
+  }, [connected, address, index]);
 
   const myListings = products.filter((product) => product.status === "Active");
   const ownedProducts = products.filter(
@@ -95,15 +96,12 @@ const MyProductsPage: React.FC = () => {
         >
           <Package size={36} color="#0EA5E9" />
         </Box>
-        <Typography
-          variant="h5"
-          sx={{ fontFamily: "'Space Grotesk', sans-serif", mb: 1 }}
-        >
-          My Products
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Connect your wallet to manage your listings and owned products.
-        </Typography>
+
+        <PageHeader
+          title="My Products"
+          description="Connect your wallet to manage your listings and owned products."
+        />
+
         <Button
           variant="contained"
           onClick={connect}
@@ -131,12 +129,7 @@ const MyProductsPage: React.FC = () => {
             gap: 2,
           }}
         >
-          <Typography
-            variant="h3"
-            sx={{ fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            My Products
-          </Typography>
+          <PageHeader title="My Products" />
           <Button
             variant="contained"
             startIcon={<PlusCircle size={16} />}

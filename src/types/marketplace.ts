@@ -21,3 +21,8 @@ export enum SortType {
   PriceAsc = "price-asc",
   PriceDesc = "price-desc",
 }
+
+export enum CurrencyType {
+  PHX = "PHX",
+  ETH = "ETH",
+}

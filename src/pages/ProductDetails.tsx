@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { ArrowLeft } from "lucide-react";
 import { useWallet } from "@/context/WalletContext";
 import { useDialog } from "@/context/DialogContext";
@@ -15,6 +9,8 @@ import { getProductDetails } from "@/services/productService";
 import { errorHandler } from "@/utils";
 import ProductOverview from "@/components/ProductDetails/ProductOverview";
 import PurchaseDialog from "@/components/ProductDetails/PurchaseDialog";
+import LoadingError from "@/components/ProductDetails/LoadingError";
+import { Loading } from "@/components/core/Common";
 
 const ProductDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -69,35 +65,11 @@ const ProductDetailsPage: React.FC = () => {
   }, [id, reloadVersion]);
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <Loading />;
   }
 
   if (loadError) {
-    return (
-      <Box sx={{ maxWidth: 720, mx: "auto", py: 6 }}>
-        <Alert
-          severity="error"
-          action={
-            <Button
-              color="inherit"
-              size="small"
-              onClick={() => setReloadVersion((version) => version + 1)}
-            >
-              Retry
-            </Button>
-          }
-        >
-          {loadError}
-        </Alert>
-        <Button onClick={() => navigate("/")} sx={{ mt: 2 }}>
-          Back to Marketplace
-        </Button>
-      </Box>
-    );
+    return <LoadingError>{loadError}</LoadingError>;
   }
 
   if (!product) {

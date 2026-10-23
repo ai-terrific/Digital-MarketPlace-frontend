@@ -1,4 +1,4 @@
-import type { CurrencyType } from "./ui";
+import { CurrencyType } from "./marketplace";
 
 export enum ProductStatus {
   Active = "Active",
@@ -37,4 +37,11 @@ export interface ContractProduct {
   currentOwner: string;
   price: bigint;
   listed: boolean;
+}
+
+export interface CreateProductFormData {
+  name: string;
+  description: string;
+  price: string;
+  currency: CurrencyType;
 }

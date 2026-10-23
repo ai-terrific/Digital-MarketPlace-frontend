@@ -3,5 +3,5 @@ export * from "./api";
 export * from "./marketplace";
 export * from "./product";
 export * from "./transactions";
-export * from "./ui";
+export * from "./system";
 export * from "./wallet";

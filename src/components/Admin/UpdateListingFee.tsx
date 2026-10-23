@@ -18,12 +18,12 @@ import { validateFee } from "@/utils";
 
 interface UpdateListingFeeType {
   adminData: MarketplaceAdminData | null;
-  setReloadIndex: React.Dispatch<React.SetStateAction<number>>;
+  refresh: () => void;
 }
 
 const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
   adminData,
-  setReloadIndex,
+  refresh,
 }) => {
   const { getSigner } = useWallet();
   const [newListingFee, setNewListingFee] = useState<string>(
@@ -65,7 +65,7 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
       const hash = await updateFixedListingFee(fee, signer);
       setListingFeeTransactionHash(hash);
       setListingFeeStatus(StatusType.Success);
-      setReloadIndex((index) => index + 1);
+      refresh();
     } catch (error) {
       setListingFeeError(
         error instanceof Error
@@ -83,7 +83,6 @@ const UpdateListingFee: React.FC<UpdateListingFeeType> = ({
       <Typography
         variant="h6"
         sx={{
-          fontFamily: "'Space Grotesk', sans-serif",
           mb: 2,
           display: "flex",
           alignItems: "center",

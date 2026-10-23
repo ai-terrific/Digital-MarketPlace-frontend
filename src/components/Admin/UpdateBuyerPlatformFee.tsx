@@ -17,13 +17,13 @@ import { StatusType } from "@/types";
 interface UpdateBuyerPlatformFeeProps {
   currentFee: number;
   maxFee: number;
-  setReloadIndex: React.Dispatch<React.SetStateAction<number>>;
+  refresh: () => void;
 }
 
 const UpdateBuyerPlatformFee: React.FC<UpdateBuyerPlatformFeeProps> = ({
   currentFee,
   maxFee,
-  setReloadIndex,
+  refresh,
 }) => {
   const { getSigner } = useWallet();
   const [newFee, setNewFee] = useState(String(currentFee));
@@ -50,7 +50,7 @@ const UpdateBuyerPlatformFee: React.FC<UpdateBuyerPlatformFeeProps> = ({
       const hash = await updateMarketplaceFee(parseUnits(newFee, 2), signer);
       setFeeTransactionHash(hash);
       setFeeStatus(StatusType.Success);
-      setReloadIndex((index) => index + 1);
+      refresh();
     } catch (error) {
       setFeeError(
         error instanceof Error ? error.message : "Platform fee update failed.",

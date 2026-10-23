@@ -9,7 +9,6 @@ import {
   uploadProductImage,
 } from "@/services/productService";
 import { StatusType } from "@/types";
-import { PageDescription, PageTitle } from "@/components/Core/Common";
 import CreateProductForm from "@/components/CreateProduct/CreateProductForm";
 import {
   errorHandler,
@@ -19,7 +18,8 @@ import {
   validation,
 } from "@/utils";
 import { Alert } from "@mui/material";
-import { CreateProductFormData, CurrencyType } from "@/types/ui";
+import { CreateProductFormData, CurrencyType } from "@/types";
+import PageHeader from "@/components/core/PageHeader";
 
 const CreateProductPage: React.FC = () => {
   const navigate = useNavigate();
@@ -161,13 +161,14 @@ const CreateProductPage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <PageTitle title="Create Listing" />
-        <PageDescription
+        <PageHeader
+          title="Create Listing"
           description={`List a digital product on PHX Marketplace. Creating a product costs a
           fixed listing fee of ${fixedListingFee ?? "loading..."} PHX, regardless
           of the product price. Approve the fee in your wallet before confirming
           the listing transaction.`}
         />
+
         {listingFeeError && (
           <Alert severity="error" sx={{ mb: 3 }}>
             Could not load the current fixed listing fee: {listingFeeError}

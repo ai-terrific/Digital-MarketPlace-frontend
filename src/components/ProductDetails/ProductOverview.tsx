@@ -1,10 +1,10 @@
 import { Box } from "@mui/material";
 import { motion } from "framer-motion";
 import { type Product } from "@/types";
-import { PageDescription, PageTitle } from "@/components/Core/Common";
 import ProductImage from "./ProductImage";
 import ProductPrice from "./ProductPrice";
 import ProductAction from "./ProductAction";
+import PageHeader from "../core/PageHeader";
 
 interface ProductOverviewProps {
   product: Product;
@@ -37,8 +37,7 @@ const ProductOverview: React.FC<ProductOverviewProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <PageTitle title={product.name} />
-          <PageDescription description={product.description} />
+          <PageHeader title={product.name} description={product.description} />
 
           <ProductPrice
             product={product}
